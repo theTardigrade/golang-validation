@@ -1,8 +1,8 @@
 package data
 
 import (
-	"bytes"
 	"reflect"
+	"strings"
 	"unicode"
 )
 
@@ -41,22 +41,31 @@ func NewMain(field *reflect.StructField, fieldValue *reflect.Value, failureMessa
 }
 
 func formatFieldName(name string) string {
-	var newName bytes.Buffer
+	var builder strings.Builder
+	var i int
 
-	for i, r := range name {
-		if unicode.IsUpper(r) {
-			if i == 0 {
-				newName.WriteRune(r)
-			} else {
-				newName.WriteRune(' ')
-				newName.WriteRune(unicode.ToLower(r))
+	for _, r := range name {
+		if unicode.IsLetter(r) {
+			if unicode.IsUpper(r) {
+				if i == 0 {
+					builder.WriteRune(r)
+				} else {
+					builder.WriteRune(' ')
+					builder.WriteRune(unicode.ToLower(r))
+				}
+			} else if unicode.IsLower(r) {
+				if i == 0 {
+					builder.WriteRune(unicode.ToUpper(r))
+				} else {
+					builder.WriteRune(r)
+				}
 			}
-		} else if unicode.IsLetter(r) {
-			newName.WriteRune(r)
+
+			i++
 		}
 	}
 
-	return newName.String()
+	return builder.String()
 }
 
 func (m *Main) SetFailure(message string) {
