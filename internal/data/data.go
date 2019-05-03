@@ -94,21 +94,10 @@ func (m *Main) loadTags() {
 	}
 }
 
-func (m *Main) tagByKey(key string) (tag *Tag) {
-	for _, tag2 := range m.Tags {
-		if tag2.Key == key {
-			tag = tag2
-			break
-		}
-	}
-
-	return
-}
-
 func (m *Main) loadFormattedFieldName() {
 	var n string
 
-	if tag := m.tagByKey(formattedFieldNameTagKey); tag != nil {
+	if tag := m.TagFromKey(formattedFieldNameTagKey); tag != nil {
 		n = tag.Value
 	} else if formattedFieldName, found := m.Field.Tag.Lookup(formattedFieldNameTagName); found {
 		n = formattedFieldName
