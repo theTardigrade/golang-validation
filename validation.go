@@ -7,10 +7,6 @@ import (
 	"github.com/theTardigrade/validation/internal/tests"
 )
 
-const (
-	tagName = "validation"
-)
-
 func Validate(model interface{}) (isValidated bool, failureMessages []string, err error) {
 	t := reflect.TypeOf(model)
 	kind := t.Kind()
