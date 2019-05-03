@@ -2,6 +2,7 @@ package validation
 
 import (
 	"reflect"
+	"sync"
 
 	"github.com/theTardigrade/validation/internal/data"
 	"github.com/theTardigrade/validation/internal/handling"
@@ -18,13 +19,25 @@ func Validate(model interface{}) (isValidated bool, failureMessages []string, er
 	}
 
 	if kind == reflect.Struct {
-		for i, l := 0, t.NumField(); i < l; i++ {
-			field := t.Field(i)
-			fieldValue := value.FieldByName(field.Name)
-			d := data.NewMain(&field, &fieldValue, &failureMessages)
+		var wg sync.WaitGroup
+		var mutex sync.Mutex
 
-			handling.HandleAllTags(d)
+		l := t.NumField()
+		wg.Add(l)
+
+		for i := 0; i < l; i++ {
+			go func(i int) {
+				field := t.Field(i)
+				fieldValue := value.FieldByName(field.Name)
+				d := data.NewMain(&field, &fieldValue, &failureMessages, &mutex)
+
+				handling.HandleAllTags(d)
+
+				wg.Done()
+			}(i)
 		}
+
+		wg.Wait()
 	}
 
 	isValidated = len(failureMessages) == 0

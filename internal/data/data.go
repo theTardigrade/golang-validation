@@ -3,6 +3,7 @@ package data
 import (
 	"reflect"
 	"strings"
+	"sync"
 	"unicode"
 )
 
@@ -22,19 +23,26 @@ type Tag struct {
 type TagCollection []*Tag
 
 type Main struct {
-	Field              *reflect.StructField
-	FieldValue         *reflect.Value
-	FormattedFieldName string
-	Tags               TagCollection
-	CurrentTag         *Tag
-	FailureMessages    *[]string
+	Field                *reflect.StructField
+	FieldValue           *reflect.Value
+	FormattedFieldName   string
+	Tags                 TagCollection
+	CurrentTag           *Tag
+	FailureMessages      *[]string
+	failureMessagesMutex *sync.Mutex
 }
 
-func NewMain(field *reflect.StructField, fieldValue *reflect.Value, failureMessages *[]string) *Main {
+func NewMain(
+	field *reflect.StructField,
+	fieldValue *reflect.Value,
+	failureMessages *[]string,
+	mutex *sync.Mutex,
+) *Main {
 	main := Main{
-		Field:           field,
-		FieldValue:      fieldValue,
-		FailureMessages: failureMessages,
+		Field:                field,
+		FieldValue:           fieldValue,
+		FailureMessages:      failureMessages,
+		failureMessagesMutex: mutex,
 	}
 
 	main.loadTags()
@@ -113,7 +121,9 @@ func (m *Main) SetFailure(message string) {
 		m.CurrentTag.HasFailed = true
 	}
 
+	m.failureMessagesMutex.Lock()
 	*m.FailureMessages = append(*m.FailureMessages, message)
+	m.failureMessagesMutex.Unlock()
 }
 
 func (m *Main) ContainsTagKey(key string) bool {
