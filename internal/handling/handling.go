@@ -53,31 +53,12 @@ func HandleTag(m *data.Main, tag *data.Tag) (err error) {
 	return
 }
 
-func HandleAllTags(m *data.Main) error {
-	var wg sync.WaitGroup
-	var pool sync.Pool
-
-	if tags := m.Tags; tags != nil {
-		if l := len(tags); l > 0 {
-			wg.Add(l)
-
-			for _, tag := range m.Tags {
-				go func(tag *data.Tag) {
-					if err := HandleTag(m, tag); err != nil {
-						pool.Put(err)
-					}
-
-					wg.Done()
-				}(tag)
-			}
+func HandleAllTags(m *data.Main) (err error) {
+	for _, tag := range m.Tags {
+		if err = HandleTag(m, tag); err != nil {
+			break
 		}
 	}
 
-	wg.Wait()
-
-	if err, ok := pool.Get().(error); ok {
-		return err
-	}
-
-	return nil
+	return
 }
