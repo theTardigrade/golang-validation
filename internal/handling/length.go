@@ -7,7 +7,7 @@ import (
 	"github.com/theTardigrade/validation/internal/data"
 )
 
-func MinLen(m *data.Main) error {
+func minlen(m *data.Main) error {
 	tagValueInt, err := strconv.Atoi(m.CurrentTag.Value)
 	if err != nil {
 		return err
@@ -29,7 +29,7 @@ func MinLen(m *data.Main) error {
 	return nil
 }
 
-func MaxLen(m *data.Main) error {
+func maxlen(m *data.Main) error {
 	tagValueInt, err := strconv.Atoi(m.CurrentTag.Value)
 	if err != nil {
 		return err
@@ -49,4 +49,9 @@ func MaxLen(m *data.Main) error {
 	}
 
 	return nil
+}
+
+func init() {
+	addHandler("minlen", minlen)
+	addHandler("maxlen", maxlen)
 }

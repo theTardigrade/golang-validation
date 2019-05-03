@@ -7,7 +7,7 @@ import (
 	"github.com/theTardigrade/validation/internal/data"
 )
 
-func Min(m *data.Main) error {
+func min(m *data.Main) error {
 	var failure bool
 
 	switch m.Field.Type.Kind() {
@@ -49,7 +49,7 @@ func Min(m *data.Main) error {
 	return nil
 }
 
-func Max(m *data.Main) error {
+func max(m *data.Main) error {
 	var failure bool
 
 	switch m.Field.Type.Kind() {
@@ -89,4 +89,9 @@ func Max(m *data.Main) error {
 	}
 
 	return nil
+}
+
+func init() {
+	addHandler("min", min)
+	addHandler("max", max)
 }
