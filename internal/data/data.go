@@ -7,11 +7,11 @@ import (
 )
 
 const (
-	validationTagName           = "validation"
-	validationTagSeparator      = ","
-	validationTagValueSeparator = "="
-	formattedFieldNameTagName   = "name"
-	formattedFieldNameTagKey    = formattedFieldNameTagName
+	validationStructTagName           = "validation"
+	validationStructTagSeparator      = ","
+	validationStructTagValueSeparator = "="
+	formattedFieldNameStructTagName   = "name"
+	formattedFieldNameTagKey          = formattedFieldNameStructTagName
 )
 
 type Tag struct {
@@ -72,17 +72,17 @@ func formatFieldName(name string) string {
 }
 
 func (m *Main) loadTags() {
-	tag := m.Field.Tag.Get(validationTagName)
-	splitTags := strings.Split(tag, validationTagSeparator)
+	tag := m.Field.Tag.Get(validationStructTagName)
+	splitTags := strings.Split(tag, validationStructTagSeparator)
 	m.Tags = make(TagCollection, 0, len(splitTags))
 
 	var tagKey string
 	var tagValue string
 
 	for _, tag = range splitTags {
-		if tagValueSeparatorIndex := strings.Index(tag, validationTagValueSeparator); tagValueSeparatorIndex != -1 {
-			tagValue = tag[tagValueSeparatorIndex+1:]
-			tagKey = tag[:tagValueSeparatorIndex]
+		if separatorIndex := strings.Index(tag, validationStructTagValueSeparator); separatorIndex != -1 {
+			tagValue = tag[separatorIndex+1:]
+			tagKey = tag[:separatorIndex]
 		} else {
 			tagKey = tag
 		}
@@ -99,7 +99,7 @@ func (m *Main) loadFormattedFieldName() {
 
 	if tag := m.TagFromKey(formattedFieldNameTagKey); tag != nil {
 		n = tag.Value
-	} else if formattedFieldName, found := m.Field.Tag.Lookup(formattedFieldNameTagName); found {
+	} else if formattedFieldName, found := m.Field.Tag.Lookup(formattedFieldNameStructTagName); found {
 		n = formattedFieldName
 	} else {
 		n = formatFieldName(m.Field.Name)
