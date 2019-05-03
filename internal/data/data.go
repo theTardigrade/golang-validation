@@ -117,13 +117,7 @@ func (m *Main) SetFailure(message string) {
 }
 
 func (m *Main) ContainsTagKey(key string) bool {
-	for _, t := range m.Tags {
-		if t.Key == key {
-			return true
-		}
-	}
-
-	return false
+	return m.TagFromKey(key) != nil
 }
 
 func (m Main) TagFromKey(key string) *Tag {
