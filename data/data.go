@@ -2,7 +2,6 @@ package data
 
 import (
 	"bytes"
-	"net/http"
 	"reflect"
 	"unicode"
 )
@@ -13,8 +12,6 @@ type Tag struct {
 }
 
 type Main struct {
-	W                  http.ResponseWriter
-	R                  *http.Request
 	Field              *reflect.StructField
 	FieldValue         *reflect.Value
 	FormattedFieldName string
@@ -23,16 +20,8 @@ type Main struct {
 	FailureMessages    []string
 }
 
-func NewMain(
-	w http.ResponseWriter,
-	r *http.Request,
-	field *reflect.StructField,
-	fieldValue *reflect.Value,
-	failureMessages []string,
-) *Main {
+func NewMain(field *reflect.StructField, fieldValue *reflect.Value, failureMessages []string) *Main {
 	return &Main{
-		W:                  w,
-		R:                  r,
 		Field:              field,
 		FieldValue:         fieldValue,
 		FormattedFieldName: formatFieldName(field.Name),
