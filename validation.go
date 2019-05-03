@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/theTardigrade/validation/data"
-	"github.com/theTardigrade/validation/tests"
+	"github.com/theTardigrade/validation/internal/data"
+	"github.com/theTardigrade/validation/internal/tests"
 )
 
 const (

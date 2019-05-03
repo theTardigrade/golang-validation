@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/theTardigrade/validation/data"
+	"github.com/theTardigrade/validation/internal/data"
 )
 
 func MinLen(m *data.Main) error {

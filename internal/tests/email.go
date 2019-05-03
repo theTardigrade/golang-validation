@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"regexp"
 
-	"github.com/theTardigrade/validation/data"
+	"github.com/theTardigrade/validation/internal/data"
 )
 
 var (

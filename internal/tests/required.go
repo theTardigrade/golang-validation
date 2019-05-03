@@ -3,7 +3,7 @@ package tests
 import (
 	"reflect"
 
-	"github.com/theTardigrade/validation/data"
+	"github.com/theTardigrade/validation/internal/data"
 )
 
 func Required(m *data.Main) error {
