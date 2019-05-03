@@ -1,7 +1,6 @@
 package validation
 
 import (
-	"net/http"
 	"reflect"
 	"strings"
 
@@ -15,7 +14,7 @@ const (
 	tagValueSeparator = "="
 )
 
-func Validate(w http.ResponseWriter, r *http.Request, model interface{}) (isValidated bool, failureMessages []string, err error) {
+func Validate(model interface{}) (isValidated bool, failureMessages []string, err error) {
 	t := reflect.TypeOf(model)
 	kind := t.Kind()
 	value := reflect.ValueOf(model)
@@ -31,7 +30,7 @@ func Validate(w http.ResponseWriter, r *http.Request, model interface{}) (isVali
 			fieldValue := value.FieldByName(field.Name)
 			tag := field.Tag.Get(tagName)
 			splitTags := strings.Split(tag, tagSeparator)
-			d := data.NewMain(w, r, &field, &fieldValue, failureMessages)
+			d := data.NewMain(&field, &fieldValue, failureMessages)
 			d.Tags = make([]*data.Tag, 0, len(splitTags))
 
 			var tagKey string
