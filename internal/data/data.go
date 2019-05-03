@@ -11,6 +11,7 @@ const (
 	validationTagSeparator      = ","
 	validationTagValueSeparator = "="
 	formattedFieldNameTagName   = "name"
+	formattedFieldNameTagKey    = formattedFieldNameTagName
 )
 
 type Tag struct {
@@ -93,12 +94,29 @@ func (m *Main) loadTags() {
 	}
 }
 
-func (m *Main) loadFormattedFieldName() {
-	if formattedFieldName, found := m.Field.Tag.Lookup(formattedFieldNameTagName); found {
-		m.FormattedFieldName = formattedFieldName
-	} else {
-		m.FormattedFieldName = formatFieldName(m.Field.Name)
+func (m *Main) tagByKey(key string) (tag *Tag) {
+	for _, tag2 := range m.Tags {
+		if tag2.Key == key {
+			tag = tag2
+			break
+		}
 	}
+
+	return
+}
+
+func (m *Main) loadFormattedFieldName() {
+	var n string
+
+	if tag := m.tagByKey(formattedFieldNameTagKey); tag != nil {
+		n = tag.Value
+	} else if formattedFieldName, found := m.Field.Tag.Lookup(formattedFieldNameTagName); found {
+		n = formattedFieldName
+	} else {
+		n = formatFieldName(m.Field.Name)
+	}
+
+	m.FormattedFieldName = n
 }
 
 func (m *Main) SetFailure(message string) {
