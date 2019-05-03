@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	tagName           = "validate"
+	tagName           = "validation"
 	tagSeparator      = ","
 	tagValueSeparator = "="
 )
