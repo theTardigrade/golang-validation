@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"fmt"
 	"reflect"
 	"strconv"
 
@@ -13,8 +12,6 @@ func MinLen(m *data.Main) error {
 	if err != nil {
 		return err
 	}
-
-	fmt.Println(m.FormattedFieldName, m.CurrentTag.Value, tagValueInt)
 
 	switch m.Field.Type.Kind() {
 	case reflect.Slice, reflect.Array, reflect.Map:
