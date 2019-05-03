@@ -12,20 +12,13 @@ func Required(m *data.Main) error {
 		if len(m.FieldValue.String()) == 0 {
 			m.SetFailure(m.FormattedFieldName + " required.")
 		}
-		/*
-			case reflect.Ptr, reflect.Interface:
-						for {
-							value := m.FieldValue.Elem()
-							m.FieldValue = &value
-							kind = value.Kind()
-
-							if kind != reflect.Ptr && kind != reflect.Interface {
-								break
-							}
-						}
-						fallthrough
-					case reflect.Struct:
-		*/
+	case reflect.Ptr:
+		for value := *m.FieldValue; value.Kind() == reflect.Ptr; value = value.Elem() {
+			if value.IsNil() {
+				m.SetFailure(m.FormattedFieldName + " required.")
+				break
+			}
+		}
 	default:
 		return ErrUnexpectedType
 	}
