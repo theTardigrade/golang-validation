@@ -7,7 +7,10 @@ import (
 )
 
 const (
-	formattedFieldNameTagName = "name"
+	validationTagName           = "validation"
+	validationTagSeparator      = ","
+	validationTagValueSeparator = "="
+	formattedFieldNameTagName   = "name"
 )
 
 type Tag struct {
@@ -15,11 +18,13 @@ type Tag struct {
 	HasFailed  bool
 }
 
+type TagCollection []*Tag
+
 type Main struct {
 	Field              *reflect.StructField
 	FieldValue         *reflect.Value
 	FormattedFieldName string
-	Tags               []*Tag
+	Tags               TagCollection
 	CurrentTag         *Tag
 	FailureMessages    *[]string
 }
@@ -31,11 +36,8 @@ func NewMain(field *reflect.StructField, fieldValue *reflect.Value, failureMessa
 		FailureMessages: failureMessages,
 	}
 
-	if formattedFieldName, found := field.Tag.Lookup(formattedFieldNameTagName); found {
-		main.FormattedFieldName = formattedFieldName
-	} else {
-		main.FormattedFieldName = formatFieldName(field.Name)
-	}
+	main.loadTags()
+	main.loadFormattedFieldName()
 
 	return &main
 }
@@ -66,6 +68,37 @@ func formatFieldName(name string) string {
 	}
 
 	return builder.String()
+}
+
+func (m *Main) loadTags() {
+	tag := m.Field.Tag.Get(validationTagName)
+	splitTags := strings.Split(tag, validationTagSeparator)
+	m.Tags = make(TagCollection, 0, len(splitTags))
+
+	var tagKey string
+	var tagValue string
+
+	for _, tag = range splitTags {
+		if tagValueSeparatorIndex := strings.Index(tag, validationTagValueSeparator); tagValueSeparatorIndex != -1 {
+			tagValue = tag[tagValueSeparatorIndex+1:]
+			tagKey = tag[:tagValueSeparatorIndex]
+		} else {
+			tagKey = tag
+		}
+
+		m.Tags = append(m.Tags, &Tag{
+			Key:   tagKey,
+			Value: tagValue,
+		})
+	}
+}
+
+func (m *Main) loadFormattedFieldName() {
+	if formattedFieldName, found := m.Field.Tag.Lookup(formattedFieldNameTagName); found {
+		m.FormattedFieldName = formattedFieldName
+	} else {
+		m.FormattedFieldName = formatFieldName(m.Field.Name)
+	}
 }
 
 func (m *Main) SetFailure(message string) {
