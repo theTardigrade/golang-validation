@@ -30,7 +30,7 @@ func Validate(model interface{}) (isValidated bool, failureMessages []string, er
 			fieldValue := value.FieldByName(field.Name)
 			tag := field.Tag.Get(tagName)
 			splitTags := strings.Split(tag, tagSeparator)
-			d := data.NewMain(&field, &fieldValue, failureMessages)
+			d := data.NewMain(&field, &fieldValue, &failureMessages)
 			d.Tags = make([]*data.Tag, 0, len(splitTags))
 
 			var tagKey string

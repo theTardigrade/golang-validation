@@ -17,10 +17,10 @@ type Main struct {
 	FormattedFieldName string
 	Tags               []*Tag
 	CurrentTag         *Tag
-	FailureMessages    []string
+	FailureMessages    *[]string
 }
 
-func NewMain(field *reflect.StructField, fieldValue *reflect.Value, failureMessages []string) *Main {
+func NewMain(field *reflect.StructField, fieldValue *reflect.Value, failureMessages *[]string) *Main {
 	return &Main{
 		Field:              field,
 		FieldValue:         fieldValue,
@@ -53,7 +53,7 @@ func (m *Main) SetFailure(message string) {
 		m.CurrentTag.HasFailed = true
 	}
 
-	m.FailureMessages = append(m.FailureMessages, message)
+	*m.FailureMessages = append(*m.FailureMessages, message)
 }
 
 func (m *Main) ContainsTagKey(key string) bool {
