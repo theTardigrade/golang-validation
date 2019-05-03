@@ -4,7 +4,7 @@ import (
 	"reflect"
 
 	"github.com/theTardigrade/validation/internal/data"
-	"github.com/theTardigrade/validation/internal/tests"
+	"github.com/theTardigrade/validation/internal/handling"
 )
 
 func Validate(model interface{}) (isValidated bool, failureMessages []string, err error) {
@@ -23,7 +23,7 @@ func Validate(model interface{}) (isValidated bool, failureMessages []string, er
 			fieldValue := value.FieldByName(field.Name)
 			d := data.NewMain(&field, &fieldValue, &failureMessages)
 
-			tests.HandleAllTags(d)
+			handling.HandleAllTags(d)
 		}
 	}
 
