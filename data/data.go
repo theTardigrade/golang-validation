@@ -6,6 +6,10 @@ import (
 	"unicode"
 )
 
+const (
+	formattedFieldNameTagName = "name"
+)
+
 type Tag struct {
 	Key, Value string
 	HasFailed  bool
@@ -21,12 +25,19 @@ type Main struct {
 }
 
 func NewMain(field *reflect.StructField, fieldValue *reflect.Value, failureMessages *[]string) *Main {
-	return &Main{
-		Field:              field,
-		FieldValue:         fieldValue,
-		FormattedFieldName: formatFieldName(field.Name),
-		FailureMessages:    failureMessages,
+	main := Main{
+		Field:           field,
+		FieldValue:      fieldValue,
+		FailureMessages: failureMessages,
 	}
+
+	if formattedFieldName, found := field.Tag.Lookup(formattedFieldNameTagName); found {
+		main.FormattedFieldName = formattedFieldName
+	} else {
+		main.FormattedFieldName = formatFieldName(field.Name)
+	}
+
+	return &main
 }
 
 func formatFieldName(name string) string {
