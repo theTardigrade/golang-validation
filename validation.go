@@ -19,25 +19,33 @@ func Validate(model interface{}) (isValidated bool, failureMessages []string, er
 	}
 
 	if kind == reflect.Struct {
-		var wg sync.WaitGroup
-		var mutex sync.RWMutex
+		if l := t.NumField(); l > 0 {
+			var wg sync.WaitGroup
+			var mutex sync.RWMutex
+			var pool sync.Pool
 
-		l := t.NumField()
-		wg.Add(l)
+			wg.Add(l)
 
-		for i := 0; i < l; i++ {
-			go func(i int) {
-				field := t.Field(i)
-				fieldValue := value.FieldByName(field.Name)
-				d := data.NewMain(&field, &fieldValue, &failureMessages, &mutex)
+			for i := 0; i < l; i++ {
+				go func(i int) {
+					field := t.Field(i)
+					fieldValue := value.FieldByName(field.Name)
+					d := data.NewMain(&field, &fieldValue, &failureMessages, &mutex)
 
-				handling.HandleAllTags(d) // TODO: check err
+					if err2 := handling.HandleAllTags(d); err2 != nil {
+						pool.Put(err2)
+					}
 
-				wg.Done()
-			}(i)
+					wg.Done()
+				}(i)
+			}
+
+			wg.Wait()
+
+			if err2, ok := pool.Get().(error); ok {
+				err = err2
+			}
 		}
-
-		wg.Wait()
 	}
 
 	isValidated = len(failureMessages) == 0
