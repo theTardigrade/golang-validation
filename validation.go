@@ -20,7 +20,7 @@ func Validate(model interface{}) (isValidated bool, failureMessages []string, er
 
 	if kind == reflect.Struct {
 		var wg sync.WaitGroup
-		var mutex sync.Mutex
+		var mutex sync.RWMutex
 
 		l := t.NumField()
 		wg.Add(l)
@@ -31,7 +31,7 @@ func Validate(model interface{}) (isValidated bool, failureMessages []string, er
 				fieldValue := value.FieldByName(field.Name)
 				d := data.NewMain(&field, &fieldValue, &failureMessages, &mutex)
 
-				handling.HandleAllTags(d)
+				handling.HandleAllTags(d) // TODO: check err
 
 				wg.Done()
 			}(i)

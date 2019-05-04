@@ -11,7 +11,7 @@ var (
 	ErrUnexpectedType = errors.New("unexpected type")
 )
 
-type handler (func(m *data.Main) error)
+type handler (func(*data.Main, *data.Tag) error)
 type handlerCollection []handler
 type storeMap map[string]handlerCollection
 
@@ -40,11 +40,9 @@ func HandleTag(m *data.Main, tag *data.Tag) (err error) {
 	defer storeMutex.RUnlock()
 	storeMutex.RLock()
 
-	m.CurrentTag = tag
-
 	if handlers, found := store[tag.Key]; found {
 		for _, h := range handlers {
-			if err = h(m); err != nil {
+			if err = h(m, tag); err != nil {
 				break
 			}
 		}
@@ -54,9 +52,28 @@ func HandleTag(m *data.Main, tag *data.Tag) (err error) {
 }
 
 func HandleAllTags(m *data.Main) (err error) {
-	for _, tag := range m.Tags {
-		if err = HandleTag(m, tag); err != nil {
-			break
+	if tags := m.Tags; tags != nil {
+		if l := len(tags); l > 0 {
+			var wg sync.WaitGroup
+			var pool sync.Pool
+
+			wg.Add(l)
+
+			for _, tag := range m.Tags {
+				go func(tag *data.Tag) {
+					if err = HandleTag(m, tag); err != nil {
+						pool.Put(err)
+					}
+
+					wg.Done()
+				}(tag)
+			}
+
+			wg.Wait()
+
+			if err2, ok := pool.Get().(error); ok {
+				err = err2
+			}
 		}
 	}
 

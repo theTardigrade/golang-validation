@@ -17,32 +17,31 @@ const (
 
 type Tag struct {
 	Key, Value string
-	HasFailed  bool
+	hasFailed  bool
 }
 
 type TagCollection []*Tag
 
 type Main struct {
-	Field                *reflect.StructField
-	FieldValue           *reflect.Value
-	FormattedFieldName   string
-	Tags                 TagCollection
-	CurrentTag           *Tag
-	FailureMessages      *[]string
-	failureMessagesMutex *sync.Mutex
+	Field              *reflect.StructField
+	FieldValue         *reflect.Value
+	FormattedFieldName string
+	Tags               TagCollection
+	FailureMessages    *[]string
+	mutex              *sync.RWMutex
 }
 
 func NewMain(
 	field *reflect.StructField,
 	fieldValue *reflect.Value,
 	failureMessages *[]string,
-	mutex *sync.Mutex,
+	mutex *sync.RWMutex,
 ) *Main {
 	main := Main{
-		Field:                field,
-		FieldValue:           fieldValue,
-		FailureMessages:      failureMessages,
-		failureMessagesMutex: mutex,
+		Field:           field,
+		FieldValue:      fieldValue,
+		FailureMessages: failureMessages,
+		mutex:           mutex,
 	}
 
 	main.loadTags()
@@ -116,14 +115,24 @@ func (m *Main) loadFormattedFieldName() {
 	m.FormattedFieldName = n
 }
 
-func (m *Main) SetFailure(message string) {
-	if m.CurrentTag != nil {
-		m.CurrentTag.HasFailed = true
+func (m *Main) SetFailure(tag *Tag, message string) {
+	m.mutex.Lock()
+
+	if tag != nil {
+		tag.hasFailed = true
 	}
 
-	m.failureMessagesMutex.Lock()
 	*m.FailureMessages = append(*m.FailureMessages, message)
-	m.failureMessagesMutex.Unlock()
+
+	m.mutex.Unlock()
+}
+
+func (m *Main) HasFailed(tag *Tag) (failed bool) {
+	m.mutex.RLock()
+	failed = tag.hasFailed
+	m.mutex.RUnlock()
+
+	return
 }
 
 func (m *Main) ContainsTagKey(key string) bool {
