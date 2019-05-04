@@ -14,7 +14,12 @@ type Options struct {
 	SortFailureMessages bool
 }
 
-func Validate(opts Options) (isValidated bool, failureMessages []string, err error) {
+func Validate(model interface{}) (bool, []string, error) {
+	opts := Options{Model: model}
+	return ValidateWithOptions(opts)
+}
+
+func ValidateWithOptions(opts Options) (isValidated bool, failureMessages []string, err error) {
 	model := opts.Model
 	typ := reflect.TypeOf(model)
 	kind := typ.Kind()
