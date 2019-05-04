@@ -27,14 +27,14 @@ type Main struct {
 	FormattedFieldName   string
 	Tags                 TagCollection
 	FailureMessages      *[]string
-	failureMessagesMutex *sync.RWMutex
+	failureMessagesMutex *sync.Mutex
 }
 
 func NewMain(
 	field *reflect.StructField,
 	fieldValue *reflect.Value,
 	failureMessages *[]string,
-	failureMessagesMutex *sync.RWMutex,
+	failureMessagesMutex *sync.Mutex,
 ) *Main {
 	main := Main{
 		Field:                field,

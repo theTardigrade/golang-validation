@@ -27,7 +27,7 @@ func Validate(opts Options) (isValidated bool, failureMessages []string, err err
 
 	if kind == reflect.Struct {
 		if l := typ.NumField(); l > 0 {
-			var failureMessagesMutex sync.RWMutex
+			var failureMessagesMutex sync.Mutex
 			var errMutex sync.Mutex
 			var wg sync.WaitGroup
 
