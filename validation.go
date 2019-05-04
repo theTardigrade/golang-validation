@@ -27,7 +27,8 @@ func Validate(opts Options) (isValidated bool, failureMessages []string, err err
 
 	if kind == reflect.Struct {
 		if l := typ.NumField(); l > 0 {
-			var mutex sync.RWMutex
+			var failureMessagesMutex sync.RWMutex
+			var errMutex sync.Mutex
 			var wg sync.WaitGroup
 
 			wg.Add(l)
@@ -36,14 +37,14 @@ func Validate(opts Options) (isValidated bool, failureMessages []string, err err
 				go func(i int) {
 					field := typ.Field(i)
 					fieldValue := value.FieldByName(field.Name)
-					d := data.NewMain(&field, &fieldValue, &failureMessages, &mutex)
+					d := data.NewMain(&field, &fieldValue, &failureMessages, &failureMessagesMutex)
 
 					if err2 := handling.HandleAllTags(d); err2 != nil {
-						mutex.Lock()
+						errMutex.Lock()
 						if err == nil {
 							err = err2
 						}
-						mutex.Unlock()
+						errMutex.Unlock()
 					}
 
 					wg.Done()
