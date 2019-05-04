@@ -59,14 +59,14 @@ func HandleAllTags(m *data.Main) (err error) {
 
 			wg.Add(l)
 
-			for _, tag := range m.Tags {
+			for i := 0; i < l; i++ {
 				go func(tag *data.Tag) {
 					if err = HandleTag(m, tag); err != nil {
 						pool.Put(err)
 					}
 
 					wg.Done()
-				}(tag)
+				}(m.Tags[i])
 			}
 
 			wg.Wait()
