@@ -27,8 +27,8 @@ func Validate(opts Options) (isValidated bool, failureMessages []string, err err
 
 	if kind == reflect.Struct {
 		if l := typ.NumField(); l > 0 {
+			var failureMessagesMutex sync.RWMutex
 			var wg sync.WaitGroup
-			var mutex sync.RWMutex
 			var pool sync.Pool
 
 			wg.Add(l)
@@ -37,7 +37,7 @@ func Validate(opts Options) (isValidated bool, failureMessages []string, err err
 				go func(i int) {
 					field := typ.Field(i)
 					fieldValue := value.FieldByName(field.Name)
-					d := data.NewMain(&field, &fieldValue, &failureMessages, &mutex)
+					d := data.NewMain(&field, &fieldValue, &failureMessages, &failureMessagesMutex)
 
 					if err2 := handling.HandleAllTags(d); err2 != nil {
 						pool.Put(err2)
