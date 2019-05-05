@@ -37,7 +37,8 @@ func ValidateWithOptions(opts Options) (isValidated bool, failureMessages []stri
 
 			wg.Add(l)
 
-			for i := 0; i < l; i++ {
+			var i int
+			for i = l - 1; i >= 0; i-- {
 				go func(i int) {
 					field := typ.Field(i)
 					fieldValue := value.FieldByName(field.Name)
@@ -53,7 +54,7 @@ func ValidateWithOptions(opts Options) (isValidated bool, failureMessages []stri
 
 			wg.Wait()
 
-			for i := 0; i < l; i++ {
+			for i = 0; i < l; i++ {
 				if err2 := errCollection[i]; err2 != nil {
 					err = err2
 					break
