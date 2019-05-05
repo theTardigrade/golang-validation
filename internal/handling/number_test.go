@@ -5,23 +5,23 @@ import (
 )
 
 type numberIntDummyModel struct {
-	x int `validation:"min=-4,max=20,even,indivisible=3"`
+	x int `validation:"min=-4,max=20,even,divisible=3,indivisible=9"`
 }
 
 func TestNumber_intInvalidMin(t *testing.T) {
-	model := numberIntDummyModel{-8}
+	model := numberIntDummyModel{-6}
 	executeTest(t, model, 1)
 }
 
 func TestNumber_intInvalidMax(t *testing.T) {
-	model := numberIntDummyModel{22}
+	model := numberIntDummyModel{24}
 	executeTest(t, model, 1)
 }
 
 func TestNumber_intInvalidDivisible(t *testing.T) {
 	model := numberIntDummyModel{}
 
-	for _, n := range []int{5, 7} {
+	for _, n := range []int{8, 14} {
 		model.x = n
 		executeTest(t, model, 1)
 	}
@@ -30,7 +30,7 @@ func TestNumber_intInvalidDivisible(t *testing.T) {
 func TestNumber_intInvalidIndivisible(t *testing.T) {
 	model := numberIntDummyModel{}
 
-	for _, n := range []int{6, 12, 18} {
+	for _, n := range []int{18} {
 		model.x = n
 		executeTest(t, model, 1)
 	}
@@ -39,30 +39,30 @@ func TestNumber_intInvalidIndivisible(t *testing.T) {
 func TestNumber_intValid(t *testing.T) {
 	model := numberIntDummyModel{}
 
-	for _, n := range []int{4, 8, 20} {
+	for _, n := range []int{6, 12} {
 		model.x = n
 		executeTest(t, model, 0)
 	}
 }
 
 type numberUintDummyModel struct {
-	x uint `validation:"min=4,max=18,divisible=2,indivisible=4"`
+	x uint `validation:"min=4,max=18,odd,divisible=3,indivisible=5"`
 }
 
 func TestNumber_uintInvalidMin(t *testing.T) {
-	model := numberUintDummyModel{2}
+	model := numberUintDummyModel{3}
 	executeTest(t, model, 1)
 }
 
 func TestNumber_uintInvalidMax(t *testing.T) {
-	model := numberUintDummyModel{22}
+	model := numberUintDummyModel{21}
 	executeTest(t, model, 1)
 }
 
 func TestNumber_uintInvalidDivisible(t *testing.T) {
 	model := numberUintDummyModel{}
 
-	for _, n := range []uint{5, 7} {
+	for _, n := range []uint{7, 11, 13, 17} {
 		model.x = n
 		executeTest(t, model, 1)
 	}
@@ -71,7 +71,7 @@ func TestNumber_uintInvalidDivisible(t *testing.T) {
 func TestNumber_uintInvalidIndivisible(t *testing.T) {
 	model := numberUintDummyModel{}
 
-	for _, n := range []uint{4, 8, 12, 16} {
+	for _, n := range []uint{15} {
 		model.x = n
 		executeTest(t, model, 1)
 	}
@@ -80,7 +80,7 @@ func TestNumber_uintInvalidIndivisible(t *testing.T) {
 func TestNumber_uintValid(t *testing.T) {
 	model := numberUintDummyModel{}
 
-	for _, n := range []uint{6, 10, 14, 18} {
+	for _, n := range []uint{6, 9, 18} {
 		model.x = n
 		executeTest(t, model, 0)
 	}
