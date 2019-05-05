@@ -56,6 +56,7 @@ func ValidateWithOptions(opts Options) (isValidated bool, failureMessages []stri
 			for i := 0; i < l; i++ {
 				if err2 := errCollection[i]; err2 != nil {
 					err = err2
+					break
 				}
 			}
 		}
