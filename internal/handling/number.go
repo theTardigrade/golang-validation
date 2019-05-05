@@ -209,4 +209,5 @@ func init() {
 	addHandler("divisible", divisible)
 	addHandler("indivisible", indivisible)
 	addHandler("even", even)
+	addHandler("odd", odd)
 }
