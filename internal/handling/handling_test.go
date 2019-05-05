@@ -14,7 +14,7 @@ func executeTest(t *testing.T, model interface{}, expectedFailureMsgsLen int) {
 	value := reflect.ValueOf(model)
 
 	var failureMsgs []string
-	var mutex sync.RWMutex
+	var mutex sync.Mutex
 
 	for i, l := 0, value.NumField(); i < l; i++ {
 		field := typ.Field(i)

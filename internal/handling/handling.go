@@ -76,6 +76,7 @@ func HandleAllTags(m *data.Main) (err error) {
 			for i := 0; i < l; i++ {
 				if err2 := errCollection[i]; err2 != nil {
 					err = err2
+					break
 				}
 			}
 		}
