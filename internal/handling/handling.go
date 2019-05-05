@@ -55,25 +55,29 @@ func HandleAllTags(m *data.Main) (err error) {
 	if tags := m.Tags; tags != nil {
 		if l := len(tags); l > 0 {
 			var wg sync.WaitGroup
-			var errMutex sync.Mutex
+			errCollection := make([]error, l)
 
 			wg.Add(l)
 
 			for i := 0; i < l; i++ {
-				go func(tag *data.Tag) {
+				go func(i int) {
+					tag := m.Tags[i]
+
 					if err2 := HandleTag(m, tag); err2 != nil {
-						errMutex.Lock()
-						if err == nil {
-							err = err2
-						}
-						errMutex.Unlock()
+						errCollection[i] = err2
 					}
 
 					wg.Done()
-				}(m.Tags[i])
+				}(i)
 			}
 
 			wg.Wait()
+
+			for i := 0; i < l; i++ {
+				if err2 := errCollection[i]; err2 != nil {
+					err = err2
+				}
+			}
 		}
 	}
 

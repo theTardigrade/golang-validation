@@ -32,7 +32,7 @@ func ValidateWithOptions(opts Options) (isValidated bool, failureMessages []stri
 	if kind == reflect.Struct {
 		if l := typ.NumField(); l > 0 {
 			var failureMessagesMutex sync.Mutex
-			var errMutex sync.Mutex
+			errCollection := make([]error, l)
 			var wg sync.WaitGroup
 
 			wg.Add(l)
@@ -44,11 +44,7 @@ func ValidateWithOptions(opts Options) (isValidated bool, failureMessages []stri
 					d := data.NewMain(&field, &fieldValue, &failureMessages, &failureMessagesMutex)
 
 					if err2 := handling.HandleAllTags(d); err2 != nil {
-						errMutex.Lock()
-						if err == nil {
-							err = err2
-						}
-						errMutex.Unlock()
+						errCollection[i] = err2
 					}
 
 					wg.Done()
@@ -56,6 +52,12 @@ func ValidateWithOptions(opts Options) (isValidated bool, failureMessages []stri
 			}
 
 			wg.Wait()
+
+			for i := 0; i < l; i++ {
+				if err2 := errCollection[i]; err2 != nil {
+					err = err2
+				}
+			}
 		}
 	}
 
