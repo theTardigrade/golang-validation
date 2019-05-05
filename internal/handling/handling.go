@@ -61,7 +61,7 @@ func HandleAllTags(m *data.Main) (err error) {
 
 			for i := 0; i < l; i++ {
 				go func(i int) {
-					tag := m.Tags[i]
+					tag := tags[i]
 
 					if err2 := HandleTag(m, tag); err2 != nil {
 						errCollection[i] = err2
