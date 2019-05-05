@@ -5,7 +5,7 @@ import (
 )
 
 type numberIntDummyModel struct {
-	x int `validation:"min=-4,max=20,divisible=2,indivisible=3"`
+	x int `validation:"min=-4,max=20,even,indivisible=3"`
 }
 
 func TestNumber_intInvalidMin(t *testing.T) {
