@@ -80,7 +80,7 @@ func TestNumber_uintInvalidIndivisible(t *testing.T) {
 func TestNumber_uintValid(t *testing.T) {
 	model := numberUintDummyModel{}
 
-	for _, n := range []uint{6, 9, 18} {
+	for _, n := range []uint{9} {
 		model.x = n
 		executeTest(t, model, 0)
 	}
