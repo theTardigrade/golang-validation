@@ -40,10 +40,6 @@ func HandleTag(m *data.Main, tag *data.Tag) (err error) {
 	defer storeMutex.RUnlock()
 	storeMutex.RLock()
 
-	if len(tag.Key) < 6 {
-		return errors.New(tag.Key)
-	}
-
 	if handlers, found := store[tag.Key]; found {
 		for _, h := range handlers {
 			if err = h(m, tag); err != nil {
