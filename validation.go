@@ -39,31 +39,8 @@ func ValidateWithOptions(opts Options) (isValidated bool, failureMessages []stri
 
 			wg.Add(l)
 
-			var i int
-			for i = 0; i < l; i++ {
-				go func(i int) {
-					defer wg.Done()
-
-					field := typ.Field(i)
-					fieldValue := value.FieldByName(field.Name)
-					d := data.NewMain(&field, &fieldValue, &failureMessages, &failureMessagesMutex)
-
-					errMutex.RLock()
-					exitEarly := errIndex < i
-					errMutex.RUnlock()
-
-					if exitEarly {
-						return
-					}
-
-					if err2 := handling.HandleAllTags(d); err2 != nil {
-						errMutex.Lock()
-						if i < errIndex {
-							err, errIndex = err2, i
-						}
-						errMutex.Unlock()
-					}
-				}(i)
+			for i := 0; i < l; i++ {
+				go validateField(i, typ, value, &wg, &err, &errIndex, &errMutex, &failureMessages, &failureMessagesMutex)
 			}
 
 			wg.Wait()
@@ -77,4 +54,38 @@ func ValidateWithOptions(opts Options) (isValidated bool, failureMessages []stri
 	}
 
 	return
+}
+
+func validateField(
+	i int,
+	typ reflect.Type,
+	value reflect.Value,
+	wgPtr *sync.WaitGroup,
+	errPtr *error,
+	errIndexPtr *int,
+	errMutexPtr *sync.RWMutex,
+	failureMessagesPtr *[]string,
+	failureMessagesMutexPtr *sync.Mutex,
+) {
+	defer wgPtr.Done()
+
+	field := typ.Field(i)
+	fieldValue := value.FieldByName(field.Name)
+	main := data.NewMain(&field, &fieldValue, failureMessagesPtr, failureMessagesMutexPtr)
+
+	errMutexPtr.RLock()
+	exitEarly := *errIndexPtr < i
+	errMutexPtr.RUnlock()
+
+	if exitEarly {
+		return
+	}
+
+	if err := handling.HandleAllTags(main); err != nil {
+		errMutexPtr.Lock()
+		if i < *errIndexPtr {
+			*errPtr, *errIndexPtr = err, i
+		}
+		errMutexPtr.Unlock()
+	}
 }
