@@ -6,6 +6,10 @@ import (
 	"github.com/theTardigrade/validation/internal/data"
 )
 
+func init() {
+	addHandler("required", required)
+}
+
 func required(m *data.Main, t *data.Tag) error {
 	switch kind := m.Field.Type.Kind(); kind {
 	case reflect.String:
@@ -24,8 +28,4 @@ func required(m *data.Main, t *data.Tag) error {
 	}
 
 	return nil
-}
-
-func init() {
-	addHandler("required", required)
 }

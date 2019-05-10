@@ -7,6 +7,15 @@ import (
 	"github.com/theTardigrade/validation/internal/data"
 )
 
+func init() {
+	addHandler("min", min)
+	addHandler("max", max)
+	addHandler("divisible", divisible)
+	addHandler("indivisible", indivisible)
+	addHandler("even", even)
+	addHandler("odd", odd)
+}
+
 func min(m *data.Main, t *data.Tag) error {
 	var failure bool
 
@@ -201,13 +210,4 @@ func odd(m *data.Main, t *data.Tag) error {
 	}
 
 	return nil
-}
-
-func init() {
-	addHandler("min", min)
-	addHandler("max", max)
-	addHandler("divisible", divisible)
-	addHandler("indivisible", indivisible)
-	addHandler("even", even)
-	addHandler("odd", odd)
 }

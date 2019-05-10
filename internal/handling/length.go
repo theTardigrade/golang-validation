@@ -7,6 +7,11 @@ import (
 	"github.com/theTardigrade/validation/internal/data"
 )
 
+func init() {
+	addHandler("minlen", minlen)
+	addHandler("maxlen", maxlen)
+}
+
 func minlen(m *data.Main, t *data.Tag) error {
 	tagValueInt, err := strconv.Atoi(t.Value)
 	if err != nil {
@@ -49,9 +54,4 @@ func maxlen(m *data.Main, t *data.Tag) error {
 	}
 
 	return nil
-}
-
-func init() {
-	addHandler("minlen", minlen)
-	addHandler("maxlen", maxlen)
 }

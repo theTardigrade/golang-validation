@@ -7,6 +7,11 @@ import (
 	"github.com/theTardigrade/validation/internal/data"
 )
 
+func init() {
+	addHandler("prefix", prefix)
+	addHandler("suffix", suffix)
+}
+
 func prefix(m *data.Main, t *data.Tag) error {
 	switch kind := m.Field.Type.Kind(); kind {
 	case reflect.String:
@@ -41,9 +46,4 @@ func suffix(m *data.Main, t *data.Tag) error {
 	}
 
 	return nil
-}
-
-func init() {
-	addHandler("prefix", prefix)
-	addHandler("suffix", suffix)
 }
