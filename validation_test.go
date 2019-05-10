@@ -19,7 +19,7 @@ func BenchmarkValidation(b *testing.B) {
 
 	for n := 0; n < b.N; n++ {
 		if _, _, err := Validate(model); err != nil {
-			//	panic(err)
+			panic(err)
 		}
 	}
 }
