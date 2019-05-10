@@ -2,6 +2,7 @@ package handling
 
 import (
 	"errors"
+	"math"
 	"sync"
 
 	"github.com/theTardigrade/validation/internal/data"
@@ -55,48 +56,36 @@ func HandleAllTags(m *data.Main) (err error) {
 	if tags := m.Tags; tags != nil {
 		if l := len(tags); l > 0 {
 			var wg sync.WaitGroup
-			errCollection := make([]error, l)
-			var errCollectionMutex sync.RWMutex
+			var errMutex sync.RWMutex
+			errIndex := math.MaxInt32
 
 			wg.Add(l)
 
-			var i int
-			for i = l - 1; i >= 0; i-- {
+			for i := 0; i < l; i++ {
 				go func(i int) {
 					defer wg.Done()
 
 					tag := tags[i]
 
-					var exitEarly bool
-
-					errCollectionMutex.RLock()
-					for j := 0; j < i; j++ {
-						if errCollection[j] != nil {
-							exitEarly = true
-						}
-					}
-					errCollectionMutex.RUnlock()
+					errMutex.RLock()
+					exitEarly := errIndex < i
+					errMutex.RUnlock()
 
 					if exitEarly {
 						return
 					}
 
 					if err2 := HandleTag(m, tag); err2 != nil {
-						errCollectionMutex.Lock()
-						errCollection[i] = err2
-						errCollectionMutex.Unlock()
+						errMutex.Lock()
+						if i < errIndex {
+							err, errIndex = err2, i
+						}
+						errMutex.Unlock()
 					}
 				}(i)
 			}
 
 			wg.Wait()
-
-			for i = 0; i < l; i++ {
-				if err2 := errCollection[i]; err2 != nil {
-					err = err2
-					break
-				}
-			}
 		}
 	}
 

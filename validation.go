@@ -1,6 +1,7 @@
 package validation
 
 import (
+	"math"
 	"reflect"
 	"sort"
 	"sync"
@@ -32,9 +33,9 @@ func ValidateWithOptions(opts Options) (isValidated bool, failureMessages []stri
 	if kind == reflect.Struct {
 		if l := typ.NumField(); l > 0 {
 			var failureMessagesMutex sync.Mutex
-			errCollection := make([]error, l)
-			var errCollectionMutex sync.RWMutex
 			var wg sync.WaitGroup
+			var errMutex sync.RWMutex
+			errIndex := math.MaxInt32
 
 			wg.Add(l)
 
@@ -47,36 +48,25 @@ func ValidateWithOptions(opts Options) (isValidated bool, failureMessages []stri
 					fieldValue := value.FieldByName(field.Name)
 					d := data.NewMain(&field, &fieldValue, &failureMessages, &failureMessagesMutex)
 
-					var exitEarly bool
-
-					errCollectionMutex.RLock()
-					for j := 0; j < i; j++ {
-						if errCollection[j] != nil {
-							exitEarly = true
-						}
-					}
-					errCollectionMutex.RUnlock()
+					errMutex.RLock()
+					exitEarly := errIndex < i
+					errMutex.RUnlock()
 
 					if exitEarly {
 						return
 					}
 
 					if err2 := handling.HandleAllTags(d); err2 != nil {
-						errCollectionMutex.Lock()
-						errCollection[i] = err2
-						errCollectionMutex.Unlock()
+						errMutex.Lock()
+						if i < errIndex {
+							err, errIndex = err2, i
+						}
+						errMutex.Unlock()
 					}
 				}(i)
 			}
 
 			wg.Wait()
-
-			for i = 0; i < l; i++ {
-				if err2 := errCollection[i]; err2 != nil {
-					err = err2
-					break
-				}
-			}
 		}
 	}
 
