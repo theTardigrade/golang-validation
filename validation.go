@@ -33,22 +33,39 @@ func ValidateWithOptions(opts Options) (isValidated bool, failureMessages []stri
 		if l := typ.NumField(); l > 0 {
 			var failureMessagesMutex sync.Mutex
 			errCollection := make([]error, l)
+			var errCollectionMutex sync.RWMutex
 			var wg sync.WaitGroup
 
 			wg.Add(l)
 
 			var i int
-			for i = l - 1; i >= 0; i-- {
+			for i = 0; i < l; i++ {
 				go func(i int) {
+					defer wg.Done()
+
 					field := typ.Field(i)
 					fieldValue := value.FieldByName(field.Name)
 					d := data.NewMain(&field, &fieldValue, &failureMessages, &failureMessagesMutex)
 
-					if err2 := handling.HandleAllTags(d); err2 != nil {
-						errCollection[i] = err2
+					var exitEarly bool
+
+					errCollectionMutex.RLock()
+					for j := 0; j < i; j++ {
+						if errCollection[j] != nil {
+							exitEarly = true
+						}
+					}
+					errCollectionMutex.RUnlock()
+
+					if exitEarly {
+						return
 					}
 
-					wg.Done()
+					if err2 := handling.HandleAllTags(d); err2 != nil {
+						errCollectionMutex.Lock()
+						errCollection[i] = err2
+						errCollectionMutex.Unlock()
+					}
 				}(i)
 			}
 

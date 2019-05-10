@@ -40,6 +40,10 @@ func HandleTag(m *data.Main, tag *data.Tag) (err error) {
 	defer storeMutex.RUnlock()
 	storeMutex.RLock()
 
+	if len(tag.Key) < 6 {
+		return errors.New(tag.Key)
+	}
+
 	if handlers, found := store[tag.Key]; found {
 		for _, h := range handlers {
 			if err = h(m, tag); err != nil {
@@ -56,19 +60,36 @@ func HandleAllTags(m *data.Main) (err error) {
 		if l := len(tags); l > 0 {
 			var wg sync.WaitGroup
 			errCollection := make([]error, l)
+			var errCollectionMutex sync.RWMutex
 
 			wg.Add(l)
 
 			var i int
 			for i = l - 1; i >= 0; i-- {
 				go func(i int) {
+					defer wg.Done()
+
 					tag := tags[i]
 
-					if err2 := HandleTag(m, tag); err2 != nil {
-						errCollection[i] = err2
+					var exitEarly bool
+
+					errCollectionMutex.RLock()
+					for j := 0; j < i; j++ {
+						if errCollection[j] != nil {
+							exitEarly = true
+						}
+					}
+					errCollectionMutex.RUnlock()
+
+					if exitEarly {
+						return
 					}
 
-					wg.Done()
+					if err2 := HandleTag(m, tag); err2 != nil {
+						errCollectionMutex.Lock()
+						errCollection[i] = err2
+						errCollectionMutex.Unlock()
+					}
 				}(i)
 			}
 
