@@ -8,23 +8,30 @@ import (
 )
 
 func init() {
-	addHandler("suffix", suffix)
+	addHandler("suffix", suffixDatum{})
 }
 
-func suffix(m *data.Main, t *data.Tag) error {
-	switch kind := m.Field.Type.Kind(); kind {
-	case reflect.String:
-		{
-			s := m.FieldValue.String()
-			l := len(s)
+type suffixDatum struct{}
 
-			if (l > 0 || m.ContainsTagKey("required")) && !strings.HasSuffix(s, t.Value) {
-				m.SetFailure(t, m.FormattedFieldName+` must end with "`+t.Value+`".`)
-			}
-		}
+func (d suffixDatum) Test(m *data.Main, t *data.Tag) (success bool, err error) {
+	switch m.FieldKind {
+	case reflect.String:
+		success, err = d.testString(m, t)
 	default:
-		return ErrUnexpectedType
+		err = ErrUnexpectedType
 	}
 
-	return nil
+	return
+}
+
+func (d suffixDatum) testString(m *data.Main, t *data.Tag) (success bool, err error) {
+	s := m.FieldValue.String()
+	l := len(s)
+
+	success = (l == 0 && !m.ContainsTagKey("required")) || strings.HasSuffix(s, t.Value)
+	return
+}
+
+func (d suffixDatum) FailureMessage(m *data.Main, t *data.Tag) string {
+	return m.FormattedFieldName + ` must end with "` + t.Value + `".`
 }

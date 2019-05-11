@@ -1,6 +1,10 @@
 package handling
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/theTardigrade/validation/internal/data"
+)
 
 type oddIntDummyModel struct {
 	x int `validation:"odd"`
@@ -8,19 +12,25 @@ type oddIntDummyModel struct {
 
 func TestOdd_intInvalid(t *testing.T) {
 	model := oddIntDummyModel{}
+	datum := oddDatum{}
 
-	for _, f := range []int{-8, -4, -2, 0, 2, 4, 8, 1e9} {
+	for _, f := range []int{60, -20, 0, 20, 4e6, 1e9} {
 		model.x = f
-		executeTest(t, model, 1)
+
+		executeTest(t, model, func(m *data.Main, t *data.Tag) (s []string) {
+			s = append(s, datum.FailureMessage(m, t))
+			return
+		})
 	}
 }
 
 func TestOdd_intValid(t *testing.T) {
 	model := oddIntDummyModel{}
 
-	for _, f := range []int{-9, -3, -1, 1, 3, 9} {
+	for _, f := range []int{-9, 1, 9, 21, 45, 9999, 1e9 - 1} {
 		model.x = f
-		executeTest(t, model, 0)
+
+		executeTest(t, model, nil)
 	}
 }
 
@@ -30,18 +40,24 @@ type oddUintDummyModel struct {
 
 func TestOdd_uintInvalid(t *testing.T) {
 	model := oddUintDummyModel{}
+	datum := oddDatum{}
 
-	for _, f := range []uint{0, 2, 4, 8, 1e9} {
+	for _, f := range []uint{60, 0, 20, 4e6, 1e9} {
 		model.x = f
-		executeTest(t, model, 1)
+
+		executeTest(t, model, func(m *data.Main, t *data.Tag) (s []string) {
+			s = append(s, datum.FailureMessage(m, t))
+			return
+		})
 	}
 }
 
 func TestOdd_uintValid(t *testing.T) {
 	model := oddUintDummyModel{}
 
-	for _, f := range []uint{1, 3, 9} {
+	for _, f := range []uint{1, 9, 21, 45, 999, 1e9 - 1} {
 		model.x = f
-		executeTest(t, model, 0)
+
+		executeTest(t, model, nil)
 	}
 }

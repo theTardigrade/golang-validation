@@ -12,7 +12,11 @@ var (
 	ErrUnexpectedType = errors.New("unexpected type")
 )
 
-type handler (func(*data.Main, *data.Tag) error)
+type handler interface {
+	Test(*data.Main, *data.Tag) (bool, error)
+	FailureMessage(*data.Main, *data.Tag) string
+}
+
 type handlerCollection []handler
 type storeMap map[string]handlerCollection
 
@@ -43,8 +47,12 @@ func HandleTag(m *data.Main, tag *data.Tag) (err error) {
 
 	if handlers, found := store[tag.Key]; found {
 		for _, h := range handlers {
-			if err = h(m, tag); err != nil {
+			var ok bool
+
+			if ok, err = h.Test(m, tag); err != nil {
 				break
+			} else if !ok {
+				m.SetFailure(tag, h.FailureMessage(m, tag))
 			}
 		}
 	}

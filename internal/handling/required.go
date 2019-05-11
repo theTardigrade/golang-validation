@@ -7,25 +7,42 @@ import (
 )
 
 func init() {
-	addHandler("required", required)
+	addHandler("required", requiredDatum{})
 }
 
-func required(m *data.Main, t *data.Tag) error {
-	switch kind := m.Field.Type.Kind(); kind {
+type requiredDatum struct{}
+
+func (d requiredDatum) Test(m *data.Main, t *data.Tag) (success bool, err error) {
+	switch m.FieldKind {
 	case reflect.String:
-		if len(m.FieldValue.String()) == 0 {
-			m.SetFailure(t, m.FormattedFieldName+" required.")
-		}
+		success, err = d.testString(m, t)
 	case reflect.Ptr:
-		for value := *m.FieldValue; value.Kind() == reflect.Ptr; value = value.Elem() {
-			if value.IsNil() {
-				m.SetFailure(t, m.FormattedFieldName+" required.")
-				break
-			}
-		}
+		success, err = d.testPointer(m, t)
 	default:
-		return ErrUnexpectedType
+		err = ErrUnexpectedType
 	}
 
-	return nil
+	return
+}
+
+func (d requiredDatum) testString(m *data.Main, t *data.Tag) (success bool, err error) {
+	success = len(m.FieldValue.String()) != 0
+	return
+}
+
+func (d requiredDatum) testPointer(m *data.Main, t *data.Tag) (success bool, err error) {
+	success = true
+
+	for value := *m.FieldValue; value.Kind() == reflect.Ptr; value = value.Elem() {
+		if value.IsNil() {
+			success = false
+			break
+		}
+	}
+
+	return
+}
+
+func (d requiredDatum) FailureMessage(m *data.Main, t *data.Tag) string {
+	return m.FormattedFieldName + " required."
 }

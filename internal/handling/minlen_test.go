@@ -2,6 +2,8 @@ package handling
 
 import (
 	"testing"
+
+	"github.com/theTardigrade/validation/internal/data"
 )
 
 type minlenStringDummyModel struct {
@@ -9,43 +11,79 @@ type minlenStringDummyModel struct {
 	y string `validation:"required,minlen=4"`
 }
 
-func TestMinlen_stringInvalidEmpty(t *testing.T) {
+func TestMinlen_stringInvalid(t *testing.T) {
 	model := minlenStringDummyModel{}
-	executeTest(t, model, 2)
-}
+	minlenDatum := minlenDatum{}
+	requiredDatum := requiredDatum{}
 
-func TestMinlen_stringInvalidMin(t *testing.T) {
-	model := minlenStringDummyModel{y: "the"}
-	executeTest(t, model, 1)
+	for _, v := range [][2]string{
+		[...]string{"", ""},
+		[...]string{"at", "abc"},
+	} {
+		model.x = v[0]
+		model.y = v[1]
+
+		executeTest(t, model, func(m *data.Main, t *data.Tag) (s []string) {
+			switch fieldValue := m.FieldValue.String(); t.Key {
+			case "minlen":
+				if len(fieldValue) > 0 || m.ContainsTagKey("required") {
+					s = append(s, minlenDatum.FailureMessage(m, t))
+				}
+			case "required":
+				if fieldValue == "" {
+					s = append(s, requiredDatum.FailureMessage(m, t))
+				}
+			}
+			return
+		})
+	}
 }
 
 func TestMinlen_stringValid(t *testing.T) {
-	model := minlenStringDummyModel{y: "these"}
-	executeTest(t, model, 0)
+	model := minlenStringDummyModel{}
+
+	for _, v := range [][2]string{
+		[...]string{"", "test"},
+		[...]string{"test", "test"},
+	} {
+		model.x = v[0]
+		model.y = v[1]
+
+		executeTest(t, model, nil)
+	}
 }
 
 type minlenSliceDummyModel struct {
 	x []string `validation:"minlen=4"`
 }
 
-func TestMinlen_sliceInvalidEmpty(t *testing.T) {
+func TestMinlen_sliceInvalid(t *testing.T) {
 	model := minlenSliceDummyModel{}
-	executeTest(t, model, 1)
-}
+	datum := minlenDatum{}
 
-func TestMinlen_sliceInvalidValue(t *testing.T) {
-	model := minlenSliceDummyModel{
-		[]string{"a", "b"},
+	for _, s := range [][]string{
+		[]string{},
+		[]string{"a"},
+		[]string{"the", "this", "these"},
+	} {
+		model.x = s
+
+		executeTest(t, model, func(m *data.Main, t *data.Tag) (s []string) {
+			s = append(s, datum.FailureMessage(m, t))
+			return
+		})
 	}
-	executeTest(t, model, 1)
 }
 
 func TestMinlen_sliceValid(t *testing.T) {
-	model := minlenSliceDummyModel{
-		[]string{"a", "b", "c", "d"},
-	}
-	executeTest(t, model, 0)
+	model := minlenSliceDummyModel{}
 
-	model.x = []string{"a", "b", "c", "d", "e", "f", "g", "h"}
-	executeTest(t, model, 0)
+	for _, s := range [][]string{
+		[]string{"a", "b", "c", "d", "e"},
+		[]string{"0", "1", "2", "3", "4", "5", "6"},
+	} {
+		model.x = s
+
+		executeTest(t, model, nil)
+	}
 }

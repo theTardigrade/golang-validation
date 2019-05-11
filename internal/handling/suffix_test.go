@@ -1,23 +1,56 @@
 package handling
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/theTardigrade/validation/internal/data"
+)
 
 type suffixStringDummyModel struct {
 	x string `validation:"suffix=s"`
-	y string `validation:"required,suffix=s"`
+	y string `validation:"required,suffix=es"`
 }
 
-func TestSuffix_stringInvalidEmpty(t *testing.T) {
+func TestSuffix_stringInvalid(t *testing.T) {
 	model := suffixStringDummyModel{}
-	executeTest(t, model, 2)
-}
+	suffixDatum := suffixDatum{}
+	requiredDatum := requiredDatum{}
 
-func TestSuffix_stringInvalidValue(t *testing.T) {
-	model := suffixStringDummyModel{x: "dog", y: "cat"}
-	executeTest(t, model, 2)
+	for _, v := range [][2]string{
+		[...]string{"", ""},
+		[...]string{"ape", "test"},
+		[...]string{"test", ""},
+	} {
+		model.x = v[0]
+		model.y = v[1]
+
+		executeTest(t, model, func(m *data.Main, t *data.Tag) (s []string) {
+			switch fieldValue := m.FieldValue.String(); t.Key {
+			case "suffix":
+				if len(fieldValue) > 0 || m.ContainsTagKey("required") {
+					s = append(s, suffixDatum.FailureMessage(m, t))
+				}
+			case "required":
+				if fieldValue == "" {
+					s = append(s, requiredDatum.FailureMessage(m, t))
+				}
+			}
+			return
+		})
+	}
 }
 
 func TestSuffix_stringValid(t *testing.T) {
-	model := suffixStringDummyModel{x: "dogs", y: "cats"}
-	executeTest(t, model, 0)
+	model := suffixStringDummyModel{}
+
+	for _, v := range [][2]string{
+		[...]string{"", "matrices"},
+		[...]string{"tests", "faces"},
+		[...]string{"s", "es"},
+	} {
+		model.x = v[0]
+		model.y = v[1]
+
+		executeTest(t, model, nil)
+	}
 }

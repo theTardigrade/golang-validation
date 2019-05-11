@@ -8,23 +8,30 @@ import (
 )
 
 func init() {
-	addHandler("prefix", prefix)
+	addHandler("prefix", prefixDatum{})
 }
 
-func prefix(m *data.Main, t *data.Tag) error {
-	switch kind := m.Field.Type.Kind(); kind {
-	case reflect.String:
-		{
-			s := m.FieldValue.String()
-			l := len(s)
+type prefixDatum struct{}
 
-			if (l > 0 || m.ContainsTagKey("required")) && !strings.HasPrefix(s, t.Value) {
-				m.SetFailure(t, m.FormattedFieldName+` must begin with "`+t.Value+`".`)
-			}
-		}
+func (d prefixDatum) Test(m *data.Main, t *data.Tag) (success bool, err error) {
+	switch m.FieldKind {
+	case reflect.String:
+		success, err = d.testString(m, t)
 	default:
-		return ErrUnexpectedType
+		err = ErrUnexpectedType
 	}
 
-	return nil
+	return
+}
+
+func (d prefixDatum) testString(m *data.Main, t *data.Tag) (success bool, err error) {
+	s := m.FieldValue.String()
+	l := len(s)
+
+	success = (l == 0 && !m.ContainsTagKey("required")) || strings.HasPrefix(s, t.Value)
+	return
+}
+
+func (d prefixDatum) FailureMessage(m *data.Main, t *data.Tag) string {
+	return m.FormattedFieldName + ` must begin with "` + t.Value + `".`
 }

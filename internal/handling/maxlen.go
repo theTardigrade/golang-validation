@@ -8,27 +8,57 @@ import (
 )
 
 func init() {
-	addHandler("maxlen", maxlen)
+	addHandler("maxlen", maxlenDatum{})
 }
 
-func maxlen(m *data.Main, t *data.Tag) error {
-	tagValueInt, err := strconv.Atoi(t.Value)
-	if err != nil {
-		return err
-	}
+type maxlenDatum struct{}
 
-	switch m.Field.Type.Kind() {
+func (d maxlenDatum) Test(m *data.Main, t *data.Tag) (success bool, err error) {
+	switch m.FieldKind {
 	case reflect.Slice, reflect.Array, reflect.Map:
-		if m.FieldValue.Len() > tagValueInt {
-			m.SetFailure(t, m.FormattedFieldName+" cannot contain more than "+t.Value+" values.")
-		}
+		success, err = d.testCollections(m, t)
 	case reflect.String:
-		if len(m.FieldValue.String()) > tagValueInt {
-			m.SetFailure(t, m.FormattedFieldName+" cannot be more than "+t.Value+" characters long.")
-		}
+		success, err = d.testString(m, t)
 	default:
-		return ErrUnexpectedType
+		err = ErrUnexpectedType
 	}
 
-	return nil
+	return
+}
+
+func (d maxlenDatum) testCollections(m *data.Main, t *data.Tag) (success bool, err error) {
+	tagValueInt, err := strconv.Atoi(t.Value)
+	if err == nil {
+		success = m.FieldValue.Len() <= tagValueInt
+	}
+
+	return
+}
+
+func (d maxlenDatum) testString(m *data.Main, t *data.Tag) (success bool, err error) {
+	tagValueInt, err := strconv.Atoi(t.Value)
+	if err == nil {
+		success = len(m.FieldValue.String()) <= tagValueInt
+	}
+
+	return
+}
+
+func (d maxlenDatum) FailureMessage(m *data.Main, t *data.Tag) string {
+	switch m.FieldKind {
+	case reflect.Slice, reflect.Array, reflect.Map:
+		return d.failureMessageCollections(m, t)
+	case reflect.String:
+		return d.failureMessageString(m, t)
+	default:
+		panic(ErrUnexpectedType)
+	}
+}
+
+func (d maxlenDatum) failureMessageCollections(m *data.Main, t *data.Tag) string {
+	return m.FormattedFieldName + " cannot contain more than " + t.Value + " values."
+}
+
+func (d maxlenDatum) failureMessageString(m *data.Main, t *data.Tag) string {
+	return m.FormattedFieldName + " cannot be more than " + t.Value + " characters long."
 }

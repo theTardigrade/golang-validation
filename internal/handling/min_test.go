@@ -3,6 +3,8 @@ package handling
 import (
 	"math"
 	"testing"
+
+	"github.com/theTardigrade/validation/internal/data"
 )
 
 type minIntDummyModel struct {
@@ -11,19 +13,25 @@ type minIntDummyModel struct {
 
 func TestMin_intInvalid(t *testing.T) {
 	model := minIntDummyModel{}
+	datum := minDatum{}
 
-	for _, f := range []int{-500, -50, -22, -21, math.MinInt32} {
+	for _, f := range []int{-21, -22, -2e6, math.MinInt32} {
 		model.x = f
-		executeTest(t, model, 1)
+
+		executeTest(t, model, func(m *data.Main, t *data.Tag) (s []string) {
+			s = append(s, datum.FailureMessage(m, t))
+			return
+		})
 	}
 }
 
 func TestMin_intValid(t *testing.T) {
 	model := minIntDummyModel{}
 
-	for _, f := range []int{-20, -19, -18, 0, 18, 19, 20, math.MaxInt32} {
+	for _, f := range []int{-20, -19, 0, 4, 20, math.MaxInt32} {
 		model.x = f
-		executeTest(t, model, 0)
+
+		executeTest(t, model, nil)
 	}
 }
 
@@ -33,19 +41,25 @@ type minUintDummyModel struct {
 
 func TestMin_uintInvalid(t *testing.T) {
 	model := minUintDummyModel{}
+	datum := minDatum{}
 
-	for _, f := range []uint{0, 1, 2, 19} {
+	for _, f := range []uint{0, 1, 5, 8, 19} {
 		model.x = f
-		executeTest(t, model, 1)
+
+		executeTest(t, model, func(m *data.Main, t *data.Tag) (s []string) {
+			s = append(s, datum.FailureMessage(m, t))
+			return
+		})
 	}
 }
 
 func TestMin_uintValid(t *testing.T) {
 	model := minUintDummyModel{}
 
-	for _, f := range []uint{20, 21, 22, 25, 500, math.MaxUint32} {
+	for _, f := range []uint{21, 22, 25, 999, math.MaxUint32} {
 		model.x = f
-		executeTest(t, model, 0)
+
+		executeTest(t, model, nil)
 	}
 }
 
@@ -55,18 +69,24 @@ type minFloat64DummyModel struct {
 
 func TestMin_float64Invalid(t *testing.T) {
 	model := minFloat64DummyModel{}
+	datum := minDatum{}
 
-	for _, f := range []float64{-1.799, -1.79, -1.7, -1, 0, 1, 1.7, 1.79, 1.799, math.SmallestNonzeroFloat64} {
+	for _, f := range []float64{1.799, 1.7, 1, 0, math.SmallestNonzeroFloat64} {
 		model.x = f
-		executeTest(t, model, 1)
+
+		executeTest(t, model, func(m *data.Main, t *data.Tag) (s []string) {
+			s = append(s, datum.FailureMessage(m, t))
+			return
+		})
 	}
 }
 
 func TestMin_float64Valid(t *testing.T) {
 	model := minFloat64DummyModel{}
 
-	for _, f := range []float64{1.801, 1.81, 1.9, 2, 500, math.MaxFloat64} {
+	for _, f := range []float64{25, 2, 1.81, 1.801, math.MaxFloat64} {
 		model.x = f
-		executeTest(t, model, 0)
+
+		executeTest(t, model, nil)
 	}
 }

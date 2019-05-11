@@ -8,22 +8,32 @@ import (
 )
 
 func init() {
-	addHandler("email", email)
+	addHandler("email", emailDatum{})
 }
+
+type emailDatum struct{}
 
 var (
 	emailRegexp = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 )
 
-func email(m *data.Main, t *data.Tag) error {
-	switch m.Field.Type.Kind() {
+func (d emailDatum) Test(m *data.Main, t *data.Tag) (success bool, err error) {
+	switch m.FieldKind {
 	case reflect.String:
-		if !emailRegexp.MatchString(m.FieldValue.String()) {
-			m.SetFailure(t, m.FormattedFieldName+" not recognised as valid.")
-		}
+		success, err = d.testString(m, t)
 	default:
-		return ErrUnexpectedType
+		err = ErrUnexpectedType
 	}
 
-	return nil
+	return
+}
+
+func (d emailDatum) testString(m *data.Main, t *data.Tag) (success bool, err error) {
+	l := len(m.FieldValue.String())
+	success = (l == 0 && !m.ContainsTagKey("required")) || emailRegexp.MatchString(m.FieldValue.String())
+	return
+}
+
+func (d emailDatum) FailureMessage(m *data.Main, t *data.Tag) string {
+	return m.FormattedFieldName + " not recognised as valid."
 }

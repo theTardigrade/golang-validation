@@ -2,50 +2,69 @@ package handling
 
 import (
 	"testing"
+
+	"github.com/theTardigrade/validation/internal/data"
 )
 
 type maxlenStringDummyModel struct {
 	x string `validation:"maxlen=4"`
-	y string `validation:"required,maxlen=4"`
 }
 
-func TestMaxlen_stringInvalidEmpty(t *testing.T) {
+func TestMaxlen_stringInvalid(t *testing.T) {
 	model := maxlenStringDummyModel{}
-	executeTest(t, model, 1)
-}
+	datum := maxlenDatum{}
 
-func TestMaxlen_stringInvalidValue(t *testing.T) {
-	model := maxlenStringDummyModel{y: "these"}
-	executeTest(t, model, 1)
+	for _, s := range []string{"these", "tests", "abcdefghijklmnopqrstuvwxyz"} {
+		model.x = s
+
+		executeTest(t, model, func(m *data.Main, t *data.Tag) (s []string) {
+			s = append(s, datum.FailureMessage(m, t))
+			return
+		})
+	}
 }
 
 func TestMaxlen_stringValid(t *testing.T) {
-	model := maxlenStringDummyModel{y: "the"}
-	executeTest(t, model, 0)
+	model := maxlenStringDummyModel{}
+
+	for _, s := range []string{"", "a", "at", "the", "this"} {
+		model.x = s
+
+		executeTest(t, model, nil)
+	}
 }
 
 type maxlenSliceDummyModel struct {
 	x []string `validation:"maxlen=4"`
 }
 
-func TestMaxlen_sliceInvalidEmpty(t *testing.T) {
+func TestMaxlen_sliceInvalid(t *testing.T) {
 	model := maxlenSliceDummyModel{}
-	executeTest(t, model, 0)
-}
+	datum := maxlenDatum{}
 
-func TestMaxlen_sliceInvalidValue(t *testing.T) {
-	model := maxlenSliceDummyModel{
+	for _, s := range [][]string{
 		[]string{"a", "b", "c", "d", "e"},
+		[]string{"0", "1", "2", "3", "4", "5", "6"},
+	} {
+		model.x = s
+
+		executeTest(t, model, func(m *data.Main, t *data.Tag) (s []string) {
+			s = append(s, datum.FailureMessage(m, t))
+			return
+		})
 	}
-	executeTest(t, model, 1)
 }
 
 func TestMaxlen_sliceValid(t *testing.T) {
-	model := maxlenSliceDummyModel{
-		[]string{"a", "b", "c", "d"},
-	}
-	executeTest(t, model, 0)
+	model := maxlenSliceDummyModel{}
 
-	model.x = []string{"a", "b"}
-	executeTest(t, model, 0)
+	for _, s := range [][]string{
+		[]string{},
+		[]string{"a"},
+		[]string{"the", "this", "these"},
+	} {
+		model.x = s
+
+		executeTest(t, model, nil)
+	}
 }

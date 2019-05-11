@@ -7,28 +7,40 @@ import (
 )
 
 func init() {
-	addHandler("even", even)
+	addHandler("even", evenDatum{})
 }
 
-func even(m *data.Main, t *data.Tag) error {
-	var failure bool
+type evenDatum struct{}
 
-	switch m.Field.Type.Kind() {
+func (d evenDatum) Test(m *data.Main, t *data.Tag) (success bool, err error) {
+	switch m.FieldKind {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		if m.FieldValue.Int()%2 != 0 {
-			failure = true
-		}
+		success, err = d.testInts(m, t)
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		if m.FieldValue.Uint()%2 != 0 {
-			failure = true
-		}
+		success, err = d.testUints(m, t)
 	default:
-		return ErrUnexpectedType
+		err = ErrUnexpectedType
 	}
 
-	if failure {
-		m.SetFailure(t, m.FormattedFieldName+" must be an even number.")
+	return
+}
+
+func (d evenDatum) testInts(m *data.Main, t *data.Tag) (success bool, err error) {
+	if err == nil && m.FieldValue.Int()%2 == 0 {
+		success = true
 	}
 
-	return nil
+	return
+}
+
+func (d evenDatum) testUints(m *data.Main, t *data.Tag) (success bool, err error) {
+	if err == nil && m.FieldValue.Uint()%2 == 0 {
+		success = true
+	}
+
+	return
+}
+
+func (d evenDatum) FailureMessage(m *data.Main, t *data.Tag) string {
+	return m.FormattedFieldName + " must be even (divisible by two)."
 }

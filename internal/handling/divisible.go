@@ -8,38 +8,42 @@ import (
 )
 
 func init() {
-	addHandler("divisible", divisible)
+	addHandler("divisible", divisibleDatum{})
 }
 
-func divisible(m *data.Main, t *data.Tag) error {
-	var failure bool
+type divisibleDatum struct{}
 
-	switch m.Field.Type.Kind() {
+func (d divisibleDatum) Test(m *data.Main, t *data.Tag) (success bool, err error) {
+	switch m.FieldKind {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		tagValueInt, err := strconv.ParseInt(t.Value, 10, 64)
-		if err != nil {
-			return err
-		}
-
-		if m.FieldValue.Int()%tagValueInt != 0 {
-			failure = true
-		}
+		success, err = d.testInts(m, t)
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		tagValueUint, err := strconv.ParseUint(t.Value, 10, 64)
-		if err != nil {
-			return err
-		}
-
-		if m.FieldValue.Uint()%tagValueUint != 0 {
-			failure = true
-		}
+		success, err = d.testUints(m, t)
 	default:
-		return ErrUnexpectedType
+		err = ErrUnexpectedType
 	}
 
-	if failure {
-		m.SetFailure(t, m.FormattedFieldName+" must be divisible by "+t.Value+".")
+	return
+}
+
+func (d divisibleDatum) testInts(m *data.Main, t *data.Tag) (success bool, err error) {
+	tagValueInt, err := strconv.ParseInt(t.Value, 10, 64)
+	if err == nil && m.FieldValue.Int()%tagValueInt == 0 {
+		success = true
 	}
 
-	return nil
+	return
+}
+
+func (d divisibleDatum) testUints(m *data.Main, t *data.Tag) (success bool, err error) {
+	tagValueUint, err := strconv.ParseUint(t.Value, 10, 64)
+	if err == nil && m.FieldValue.Uint()%tagValueUint == 0 {
+		success = true
+	}
+
+	return
+}
+
+func (d divisibleDatum) FailureMessage(m *data.Main, t *data.Tag) string {
+	return m.FormattedFieldName + " must be divisible by " + t.Value + "."
 }

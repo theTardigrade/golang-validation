@@ -24,6 +24,8 @@ type TagCollection []*Tag
 type Main struct {
 	Field                *reflect.StructField
 	FieldValue           *reflect.Value
+	FieldKind            reflect.Kind
+	FieldName            string
 	FormattedFieldName   string
 	Tags                 TagCollection
 	FailureMessages      *[]string
@@ -39,6 +41,8 @@ func NewMain(
 	main := Main{
 		Field:                field,
 		FieldValue:           fieldValue,
+		FieldKind:            field.Type.Kind(),
+		FieldName:            field.Name,
 		FailureMessages:      failureMessages,
 		failureMessagesMutex: failureMessagesMutex,
 	}
@@ -108,7 +112,7 @@ func (m *Main) loadFormattedFieldName() {
 	} else if formattedFieldName, found := m.Field.Tag.Lookup(formattedFieldNameStructTagName); found {
 		n = formattedFieldName
 	} else {
-		n = formatFieldName(m.Field.Name)
+		n = formatFieldName(m.FieldName)
 	}
 
 	m.FormattedFieldName = n

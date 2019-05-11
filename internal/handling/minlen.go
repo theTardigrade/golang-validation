@@ -8,27 +8,58 @@ import (
 )
 
 func init() {
-	addHandler("minlen", minlen)
+	addHandler("minlen", minlenDatum{})
 }
 
-func minlen(m *data.Main, t *data.Tag) error {
-	tagValueInt, err := strconv.Atoi(t.Value)
-	if err != nil {
-		return err
-	}
+type minlenDatum struct{}
 
-	switch m.Field.Type.Kind() {
+func (d minlenDatum) Test(m *data.Main, t *data.Tag) (success bool, err error) {
+	switch m.FieldKind {
 	case reflect.Slice, reflect.Array, reflect.Map:
-		if m.FieldValue.Len() < tagValueInt {
-			m.SetFailure(t, m.FormattedFieldName+" must contain at least "+t.Value+" values.")
-		}
+		success, err = d.testCollections(m, t)
 	case reflect.String:
-		if l := len(m.FieldValue.String()); (l > 0 || m.ContainsTagKey("required")) && l < tagValueInt {
-			m.SetFailure(t, m.FormattedFieldName+" must be at least "+t.Value+" characters long.")
-		}
+		success, err = d.testString(m, t)
 	default:
-		return ErrUnexpectedType
+		err = ErrUnexpectedType
 	}
 
-	return nil
+	return
+}
+
+func (d minlenDatum) testCollections(m *data.Main, t *data.Tag) (success bool, err error) {
+	tagValueInt, err := strconv.Atoi(t.Value)
+	if err == nil {
+		success = m.FieldValue.Len() >= tagValueInt
+	}
+
+	return
+}
+
+func (d minlenDatum) testString(m *data.Main, t *data.Tag) (success bool, err error) {
+	tagValueInt, err := strconv.Atoi(t.Value)
+	if err == nil {
+		l := len(m.FieldValue.String())
+		success = (l == 0 && !m.ContainsTagKey("required")) || l >= tagValueInt
+	}
+
+	return
+}
+
+func (d minlenDatum) FailureMessage(m *data.Main, t *data.Tag) string {
+	switch m.FieldKind {
+	case reflect.Slice, reflect.Array, reflect.Map:
+		return d.failureMessageCollections(m, t)
+	case reflect.String:
+		return d.failureMessageString(m, t)
+	default:
+		panic(ErrUnexpectedType)
+	}
+}
+
+func (d minlenDatum) failureMessageCollections(m *data.Main, t *data.Tag) string {
+	return m.FormattedFieldName + " must contain at least " + t.Value + " values."
+}
+
+func (d minlenDatum) failureMessageString(m *data.Main, t *data.Tag) string {
+	return m.FormattedFieldName + " must be at least " + t.Value + " characters long."
 }
