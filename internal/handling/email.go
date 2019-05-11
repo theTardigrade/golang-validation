@@ -29,8 +29,10 @@ func (d emailDatum) Test(m *data.Main, t *data.Tag) (success bool, err error) {
 }
 
 func (d emailDatum) testString(m *data.Main, t *data.Tag) (success bool, err error) {
-	l := len(m.FieldValue.String())
-	success = (l == 0 && !m.ContainsTagKey("required")) || emailRegexp.MatchString(m.FieldValue.String())
+	s := m.FieldValue.String()
+	l := len(s)
+
+	success = (l == 0 && !m.ContainsTagKey("required")) || emailRegexp.MatchString(s)
 	return
 }
 
