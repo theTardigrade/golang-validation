@@ -26,18 +26,12 @@ func (d evenDatum) Test(m *data.Main, t *data.Tag) (success bool, err error) {
 }
 
 func (d evenDatum) testInts(m *data.Main, t *data.Tag) (success bool, err error) {
-	if err == nil && m.FieldValue.Int()%2 == 0 {
-		success = true
-	}
-
+	success = m.FieldValue.Int()%2 == 0
 	return
 }
 
 func (d evenDatum) testUints(m *data.Main, t *data.Tag) (success bool, err error) {
-	if err == nil && m.FieldValue.Uint()%2 == 0 {
-		success = true
-	}
-
+	success = m.FieldValue.Uint()%2 == 0
 	return
 }
 
