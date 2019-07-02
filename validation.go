@@ -16,7 +16,10 @@ type Options struct {
 }
 
 func Validate(model interface{}) (bool, []string, error) {
-	return ValidateWithOptions(Options{Model: model})
+	return ValidateWithOptions(Options{
+		Model:               model,
+		SortFailureMessages: true,
+	})
 }
 
 func ValidateWithOptions(opts Options) (isValidated bool, failureMessages []string, err error) {
