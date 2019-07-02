@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/theTardigrade/age"
 	"github.com/theTardigrade/validation/internal/data"
-	utilTime "github.com/theTardigrade/validation/internal/util/time"
 )
 
 func init() {
@@ -17,8 +17,8 @@ type minageDatum struct{}
 func (d minageDatum) Test(m *data.Main, t *data.Tag) (success bool, err error) {
 	i := m.FieldValue.Interface()
 
-	if tm, ok := i.(time.Time); ok {
-		success, err = d.testTime(m, t, tm)
+	if date, ok := i.(time.Time); ok {
+		success, err = d.testTime(m, t, date)
 	} else {
 		err = ErrUnexpectedType
 	}
@@ -26,13 +26,14 @@ func (d minageDatum) Test(m *data.Main, t *data.Tag) (success bool, err error) {
 	return
 }
 
-func (d minageDatum) testTime(m *data.Main, t *data.Tag, tm time.Time) (success bool, err error) {
-	tagValueInt, err := strconv.ParseInt(t.Value, 10, 64)
-	if err != nil {
+func (d minageDatum) testTime(m *data.Main, t *data.Tag, date time.Time) (success bool, err error) {
+	if date.IsZero() && !m.ContainsTagKey("required") {
+		success = true
 		return
 	}
 
-	if age := utilTime.Age(tm); int64(age) >= tagValueInt {
+	tagValueInt, err := strconv.ParseInt(t.Value, 10, 64)
+	if err == nil && age.Calculate(date) >= tagValueInt {
 		success = true
 	}
 
@@ -40,5 +41,5 @@ func (d minageDatum) testTime(m *data.Main, t *data.Tag, tm time.Time) (success 
 }
 
 func (d minageDatum) FailureMessage(m *data.Main, t *data.Tag) string {
-	return m.FormattedFieldName + " cannot be less than " + t.Value + " years ago."
+	return m.FormattedFieldName + " cannot be less than " + t.Value + " years of age."
 }

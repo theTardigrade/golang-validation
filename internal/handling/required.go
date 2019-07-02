@@ -2,6 +2,7 @@ package handling
 
 import (
 	"reflect"
+	"time"
 
 	"github.com/theTardigrade/validation/internal/data"
 )
@@ -19,7 +20,15 @@ func (d requiredDatum) Test(m *data.Main, t *data.Tag) (success bool, err error)
 	case reflect.Ptr:
 		success, err = d.testPointer(m, t)
 	default:
-		err = ErrUnexpectedType
+		{
+			i := m.FieldValue.Interface()
+
+			if date, ok := i.(time.Time); ok {
+				success, err = d.testTime(m, t, date) // write tests
+			} else {
+				err = ErrUnexpectedType
+			}
+		}
 	}
 
 	return
@@ -40,6 +49,11 @@ func (d requiredDatum) testPointer(m *data.Main, t *data.Tag) (success bool, err
 		}
 	}
 
+	return
+}
+
+func (d requiredDatum) testTime(m *data.Main, t *data.Tag, date time.Time) (success bool, err error) {
+	success = !date.IsZero()
 	return
 }
 

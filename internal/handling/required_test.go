@@ -2,6 +2,7 @@ package handling
 
 import (
 	"testing"
+	"time"
 
 	"github.com/theTardigrade/validation/internal/data"
 )
@@ -58,4 +59,24 @@ func TestRequired_pointerValid(t *testing.T) {
 
 		executeTest(t, model, nil)
 	}
+}
+
+type requiredTimeDummyModel struct {
+	X time.Time `validation:"required"`
+}
+
+func TestRequired_timeInvalid(t *testing.T) {
+	model := requiredTimeDummyModel{}
+	datum := requiredDatum{}
+
+	executeTest(t, model, func(m *data.Main, t *data.Tag) (s []string) {
+		s = append(s, datum.FailureMessage(m, t))
+		return
+	})
+}
+
+func TestRequired_timeValid(t *testing.T) {
+	model := requiredTimeDummyModel{time.Now()}
+
+	executeTest(t, model, nil)
 }
