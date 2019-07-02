@@ -34,7 +34,7 @@ func (d minYearsAgoDatum) testTime(m *data.Main, t *data.Tag, tm time.Time) (suc
 		return
 	}
 
-	if givenYear < currentYear-tagValueInt {
+	if currentYear-tagValueInt >= givenYear {
 		success = true
 	}
 
