@@ -119,9 +119,10 @@ func (m *Main) loadFormattedFieldName() {
 }
 
 func (m *Main) SetFailure(tag *Tag, message string) {
+	defer m.failureMessagesMutex.Unlock()
 	m.failureMessagesMutex.Lock()
+
 	*m.FailureMessages = append(*m.FailureMessages, message)
-	m.failureMessagesMutex.Unlock()
 }
 
 func (m *Main) ContainsTagKey(key string) bool {

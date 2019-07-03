@@ -33,7 +33,7 @@ func (d minageDatum) testTime(m *data.Main, t *data.Tag, date time.Time) (succes
 	}
 
 	tagValueInt, err := strconv.ParseInt(t.Value, 10, 64)
-	if err == nil && age.Calculate(date) >= tagValueInt {
+	if err == nil && int64(age.Calculate(date)) >= tagValueInt {
 		success = true
 	}
 
