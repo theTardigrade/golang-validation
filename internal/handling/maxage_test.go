@@ -7,12 +7,12 @@ import (
 	"github.com/theTardigrade/validation/internal/data"
 )
 
-type maxageDummyModel struct {
+type maxageTimeDummyModel struct {
 	X time.Time `validation:"maxage=20"`
 }
 
 func TestMaxage_timeInvalid(t *testing.T) {
-	model := maxageDummyModel{}
+	model := maxageTimeDummyModel{}
 	datum := maxageDatum{}
 	now := time.Now()
 
@@ -31,7 +31,7 @@ func TestMaxage_timeInvalid(t *testing.T) {
 }
 
 func TestMaxage_timeValid(t *testing.T) {
-	model := maxageDummyModel{}
+	model := maxageTimeDummyModel{}
 	now := time.Now()
 
 	for _, a := range []time.Time{

@@ -7,12 +7,12 @@ import (
 	"github.com/theTardigrade/validation/internal/data"
 )
 
-type minageDummyModel struct {
+type minageTimeDummyModel struct {
 	X time.Time `validation:"minage=20"`
 }
 
 func TestMinage_timeInvalid(t *testing.T) {
-	model := minageDummyModel{}
+	model := minageTimeDummyModel{}
 	datum := minageDatum{}
 	now := time.Now()
 
@@ -32,7 +32,7 @@ func TestMinage_timeInvalid(t *testing.T) {
 }
 
 func TestMinage_timeValid(t *testing.T) {
-	model := minageDummyModel{}
+	model := minageTimeDummyModel{}
 	now := time.Now()
 
 	for _, a := range []time.Time{

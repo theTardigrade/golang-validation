@@ -33,6 +33,10 @@ func ValidateWithOptions(opts Options) (isValidated bool, failureMessages []stri
 		kind, typ = value.Kind(), value.Type()
 	}
 
+	if value == reflect.Zero(typ) {
+		return
+	}
+
 	if kind == reflect.Struct {
 		if l := typ.NumField(); l > 0 {
 			var failureMessagesMutex sync.Mutex
