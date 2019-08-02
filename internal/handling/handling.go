@@ -2,9 +2,9 @@ package handling
 
 import (
 	"errors"
-	"math"
 	"sync"
 
+	"github.com/theTardigrade/fan"
 	"github.com/theTardigrade/validation/internal/data"
 )
 
@@ -63,37 +63,9 @@ func HandleTag(m *data.Main, tag *data.Tag) (err error) {
 func HandleAllTags(m *data.Main) (err error) {
 	if tags := m.Tags; tags != nil {
 		if l := len(tags); l > 0 {
-			var wg sync.WaitGroup
-			var errMutex sync.RWMutex
-			errIndex := math.MaxInt32
-
-			wg.Add(l)
-
-			for i := 0; i < l; i++ {
-				go func(i int) {
-					defer wg.Done()
-
-					tag := tags[i]
-
-					errMutex.RLock()
-					exitEarly := errIndex < i
-					errMutex.RUnlock()
-
-					if exitEarly {
-						return
-					}
-
-					if err2 := HandleTag(m, tag); err2 != nil {
-						errMutex.Lock()
-						if i < errIndex {
-							err, errIndex = err2, i
-						}
-						errMutex.Unlock()
-					}
-				}(i)
-			}
-
-			wg.Wait()
+			fan.HandleRepeated(func(i int) error {
+				return HandleTag(m, tags[i])
+			}, l)
 		}
 	}
 
