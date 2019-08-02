@@ -1,11 +1,11 @@
 package validation
 
 import (
-	"math"
 	"reflect"
 	"sort"
 	"sync"
 
+	"github.com/theTardigrade/fan"
 	"github.com/theTardigrade/validation/internal/data"
 	"github.com/theTardigrade/validation/internal/handling"
 )
@@ -40,17 +40,10 @@ func ValidateWithOptions(opts Options) (isValidated bool, failureMessages []stri
 	if kind == reflect.Struct {
 		if l := typ.NumField(); l > 0 {
 			var failureMessagesMutex sync.Mutex
-			var wg sync.WaitGroup
-			var errMutex sync.RWMutex
-			errIndex := math.MaxInt32
 
-			wg.Add(l)
-
-			for i := 0; i < l; i++ {
-				go validateField(i, typ, value, &wg, &err, &errIndex, &errMutex, &failureMessages, &failureMessagesMutex)
-			}
-
-			wg.Wait()
+			fan.HandleRepeated(func(i int) error {
+				return validateField(i, typ, value, &failureMessages, &failureMessagesMutex)
+			}, l)
 		}
 	}
 
@@ -67,32 +60,12 @@ func validateField(
 	i int,
 	typ reflect.Type,
 	value reflect.Value,
-	wgPtr *sync.WaitGroup,
-	errPtr *error,
-	errIndexPtr *int,
-	errMutexPtr *sync.RWMutex,
 	failureMessagesPtr *[]string,
 	failureMessagesMutexPtr *sync.Mutex,
-) {
-	defer wgPtr.Done()
-
+) error {
 	field := typ.Field(i)
 	fieldValue := value.FieldByName(field.Name)
 	main := data.NewMain(&field, &fieldValue, failureMessagesPtr, failureMessagesMutexPtr)
 
-	errMutexPtr.RLock()
-	exitEarly := *errIndexPtr < i
-	errMutexPtr.RUnlock()
-
-	if exitEarly {
-		return
-	}
-
-	if err := handling.HandleAllTags(main); err != nil {
-		errMutexPtr.Lock()
-		if i < *errIndexPtr {
-			*errPtr, *errIndexPtr = err, i
-		}
-		errMutexPtr.Unlock()
-	}
+	return handling.HandleAllTags(main)
 }
