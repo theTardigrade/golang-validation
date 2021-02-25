@@ -5,9 +5,9 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/theTardigrade/fan"
-	"github.com/theTardigrade/golang-validation/internal/data"
-	"github.com/theTardigrade/golang-validation/internal/handling"
+	fan "github.com/theTardigrade/golang-fan"
+	"github.com/theTardigrade/golang-validation/data"
+	"github.com/theTardigrade/golang-validation/handling"
 )
 
 type Options struct {
