@@ -3,6 +3,7 @@ package handling
 import (
 	"reflect"
 	"regexp"
+	"strings"
 
 	"github.com/theTardigrade/golang-validation/data"
 )
@@ -37,5 +38,16 @@ func (d regexpDatum) testString(m *data.Main, t *data.Tag) (success bool, err er
 }
 
 func (d regexpDatum) FailureMessage(m *data.Main, t *data.Tag) string {
+	var builder strings.Builder
+
+	builder.WriteString(m.FormattedFieldName)
+	builder.WriteString(" must ")
+	if injunctionTag := m.TagFromKey("regexp_injunction"); injunctionTag != nil && injunctionTag.Value != "" {
+		builder.WriteString(injunctionTag.Value)
+	} else {
+		builder.WriteString("match a standard format")
+	}
+	builder.WriteByte('.')
+
 	return m.FormattedFieldName + ` must match a standard format.`
 }
