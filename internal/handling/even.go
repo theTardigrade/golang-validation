@@ -3,7 +3,7 @@ package handling
 import (
 	"reflect"
 
-	"github.com/theTardigrade/validation/internal/data"
+	"github.com/theTardigrade/golang-validation/internal/data"
 )
 
 func init() {

@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/theTardigrade/tests"
-	"github.com/theTardigrade/validation/internal/data"
+	"github.com/theTardigrade/golang-validation/internal/data"
 )
 
 type executeTestExpectedFailureMessagesCallback func(*data.Main, *data.Tag) []string

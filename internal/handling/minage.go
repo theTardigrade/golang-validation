@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/theTardigrade/age"
-	"github.com/theTardigrade/validation/internal/data"
+	"github.com/theTardigrade/golang-validation/internal/data"
 )
 
 func init() {

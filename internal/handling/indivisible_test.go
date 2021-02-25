@@ -3,7 +3,7 @@ package handling
 import (
 	"testing"
 
-	"github.com/theTardigrade/validation/internal/data"
+	"github.com/theTardigrade/golang-validation/internal/data"
 )
 
 type indivisibleIntDummyModel struct {

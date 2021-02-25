@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/theTardigrade/fan"
-	"github.com/theTardigrade/validation/internal/data"
+	"github.com/theTardigrade/golang-validation/internal/data"
 )
 
 var (

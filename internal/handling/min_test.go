@@ -4,7 +4,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/theTardigrade/validation/internal/data"
+	"github.com/theTardigrade/golang-validation/internal/data"
 )
 
 type minIntDummyModel struct {
