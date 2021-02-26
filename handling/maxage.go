@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/theTardigrade/age"
+	age "github.com/theTardigrade/golang-age"
 	"github.com/theTardigrade/golang-validation/data"
 )
 

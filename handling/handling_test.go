@@ -7,7 +7,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/theTardigrade/tests"
+	tests "github.com/theTardigrade/golang-tests"
 	"github.com/theTardigrade/golang-validation/data"
 )
 
