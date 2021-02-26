@@ -2,4 +2,5 @@ github.com/theTardigrade/golang-age v1.0.0 h1:OH/6O2g+t4vylhnf60RWZKDdTv4SmOvLKm
 github.com/theTardigrade/golang-age v1.0.0/go.mod h1:nZVStgPLHkCPSIJkT6aZxwYYZzOZGG/xuAh7T5o7L0Y=
 github.com/theTardigrade/golang-fan v0.0.0-20210225185510-bb340078f73a h1:pDTSl0DOc6A8ZelRLEYKwV27OloeoakcPP5PqNlKfhA=
 github.com/theTardigrade/golang-fan v0.0.0-20210225185510-bb340078f73a/go.mod h1:ms9hzfmML86yLO2TWkDywoxvSpD92wiMl7PKLjmuTQA=
+github.com/theTardigrade/golang-tests v0.0.0-20190504182121-a6a04b6130e7 h1:gt2A/zDOD9ZpixE3mlOA/yIDFinktqblGYSCBON4unQ=
 github.com/theTardigrade/golang-tests v0.0.0-20190504182121-a6a04b6130e7/go.mod h1:ADD8wd30nwXC44MoqCAZ2olBvyYbV1LSrS3BM+VuqcI=

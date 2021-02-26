@@ -42,7 +42,7 @@ func (d regexpDatum) FailureMessage(m *data.Main, t *data.Tag) string {
 
 	builder.WriteString(m.FormattedFieldName)
 	builder.WriteString(" must ")
-	if injunctionTag := m.TagFromKey("regexpinjunction"); injunctionTag != nil && injunctionTag.Value != "" {
+	if injunctionTag := m.TagFromKey("regexp_injunction"); injunctionTag != nil && injunctionTag.Value != "" {
 		builder.WriteString(injunctionTag.Value)
 	} else {
 		builder.WriteString("match a standard format")
