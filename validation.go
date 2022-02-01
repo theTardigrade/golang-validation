@@ -5,13 +5,14 @@ import (
 	"sort"
 	"sync"
 
-	fan "github.com/theTardigrade/golang-fan"
+	"github.com/theTardigrade/fan"
 	"github.com/theTardigrade/golang-validation/data"
 	"github.com/theTardigrade/golang-validation/handling"
 )
 
 type Options struct {
 	Model               interface{}
+	AllowedFieldNames   []string
 	SortFailureMessages bool
 }
 
@@ -41,9 +42,12 @@ func ValidateWithOptions(opts Options) (isValidated bool, failureMessages []stri
 		if l := typ.NumField(); l > 0 {
 			var failureMessagesMutex sync.Mutex
 
-			fan.HandleRepeated(func(i int) error {
-				return validateField(i, typ, value, &failureMessages, &failureMessagesMutex)
+			err = fan.HandleRepeated(func(i int) error {
+				return validateField(i, opts.AllowedFieldNames, typ, value, &failureMessages, &failureMessagesMutex)
 			}, l)
+			if err != nil {
+				return
+			}
 		}
 	}
 
@@ -58,13 +62,31 @@ func ValidateWithOptions(opts Options) (isValidated bool, failureMessages []stri
 
 func validateField(
 	i int,
+	allowedFieldNames []string,
 	typ reflect.Type,
 	value reflect.Value,
 	failureMessagesPtr *[]string,
 	failureMessagesMutexPtr *sync.Mutex,
 ) error {
 	field := typ.Field(i)
-	fieldValue := value.FieldByName(field.Name)
+	fieldName := field.Name
+
+	if allowedFieldNames != nil && len(allowedFieldNames) > 0 {
+		var allowed bool
+
+		for _, afn := range allowedFieldNames {
+			if fieldName == afn {
+				allowed = true
+				break
+			}
+		}
+
+		if !allowed {
+			return nil
+		}
+	}
+
+	fieldValue := value.FieldByName(fieldName)
 	main := data.NewMain(&field, &fieldValue, failureMessagesPtr, failureMessagesMutexPtr)
 
 	return handling.HandleAllTags(main)
