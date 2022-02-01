@@ -39,11 +39,23 @@ func ValidateWithOptions(opts Options) (isValidated bool, failureMessages []stri
 	}
 
 	if kind == reflect.Struct {
+		var allowedFieldNames []string
+		if len(opts.AllowedFieldNames) > 0 {
+			allowedFieldNames = opts.AllowedFieldNames
+		}
+
 		if l := typ.NumField(); l > 0 {
 			var failureMessagesMutex sync.Mutex
 
 			err = fan.HandleRepeated(func(i int) error {
-				return validateField(i, opts.AllowedFieldNames, typ, value, &failureMessages, &failureMessagesMutex)
+				return validateField(
+					i,
+					allowedFieldNames,
+					typ,
+					value,
+					&failureMessages,
+					&failureMessagesMutex,
+				)
 			}, l)
 			if err != nil {
 				return
@@ -71,7 +83,7 @@ func validateField(
 	field := typ.Field(i)
 	fieldName := field.Name
 
-	if allowedFieldNames != nil && len(allowedFieldNames) > 0 {
+	if allowedFieldNames != nil {
 		var allowed bool
 
 		for _, afn := range allowedFieldNames {
